@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akim.local/contracts/v1-evaluate.request.schema.json",
+  "title": "V1 evaluate request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["selections"],
+  "properties": {
+    "selections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["measureId", "districtId"],
+        "properties": {
+          "measureId": {"type": "string", "minLength": 1},
+          "districtId": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}
