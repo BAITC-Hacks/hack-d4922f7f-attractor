@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from math import isclose
+from math import isclose, isfinite
 from pathlib import Path
 
 from engine.v1.domain.model import (
@@ -21,6 +21,7 @@ class SnapshotFormatError(ValueError):
 def load_snapshot(path: Path) -> SimulationSnapshot:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
+        _validate_raw_numbers(raw)
         snapshot = SimulationSnapshot(
             id=raw["id"],
             rules_version=raw["rulesVersion"],
@@ -68,11 +69,40 @@ def load_snapshot(path: Path) -> SimulationSnapshot:
                 for measure_ids in raw["districtConflicts"]
             ),
         )
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
         raise SnapshotFormatError(f"Invalid snapshot {path}: {error}") from error
 
     _validate_snapshot(snapshot)
     return snapshot
+
+
+def _validate_raw_numbers(raw: dict) -> None:
+    """Reject non-finite values and coercions before constructing domain objects."""
+    def number(value: object, field: str, *, integer: bool = False) -> None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise SnapshotFormatError(f"{field} must be a finite number")
+        if not isfinite(value):
+            raise SnapshotFormatError(f"{field} must be a finite number")
+        if integer and int(value) != value:
+            raise SnapshotFormatError(f"{field} must be an integer")
+
+    for key in ("horizonQuarters", "requiredSelectionCount", "maxMeasuresPerDirection"):
+        number(raw[key], key, integer=True)
+    for key in ("budget", "criticalThreshold", "criticalPenalty"):
+        number(raw[key], key)
+    for key, value in raw["weights"].items():
+        number(value, f"weights.{key}")
+    for i, district in enumerate(raw["districts"]):
+        number(district["populationShare"], f"districts[{i}].populationShare")
+        for key, value in district["indicators"].items():
+            number(value, f"districts[{i}].indicators.{key}")
+    for i, measure in enumerate(raw["measures"]):
+        number(measure["cost"], f"measures[{i}].cost")
+        number(measure["lagQuarters"], f"measures[{i}].lagQuarters", integer=True)
+        for key, value in measure["effects"].items():
+            number(value, f"measures[{i}].effects.{key}")
+    for i, synergy in enumerate(raw["synergies"]):
+        number(synergy["bonus"], f"synergies[{i}].bonus")
 
 
 def _validate_snapshot(snapshot: SimulationSnapshot) -> None:
