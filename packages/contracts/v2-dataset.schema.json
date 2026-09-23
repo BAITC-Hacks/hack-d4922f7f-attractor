@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "akim/v2-dataset.schema.json",
+  "title": "Synthetic V2 composite city dataset, not calibrated observations",
+  "type": "object",
+  "required": ["schemaVersion", "mode", "status", "currency", "basePeriod", "startSimTime", "districts", "weather", "finance", "parameters"],
+  "properties": {
+    "schemaVersion": {"const": "v2-city/1.0"},
+    "mode": {"const": "dynamic-v2"},
+    "status": {"const": "synthetic"},
+    "currency": {"const": "KZT"},
+    "basePeriod": {"type": "string", "minLength": 1},
+    "startSimTime": {"type": "string", "format": "date-time"},
+    "districts": {
+      "type": "array", "minItems": 1, "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "population", "roadCapacity", "travelMinutes", "schoolCapacity", "housingUnits", "housingPrice", "crews"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "population": {"type": "integer", "minimum": 0},
+          "roadCapacity": {"type": "number", "minimum": 0, "description": "person-trips per 15 model minutes"},
+          "travelMinutes": {"type": "number", "exclusiveMinimum": 0},
+          "schoolCapacity": {"type": "integer", "minimum": 0},
+          "housingUnits": {"type": "integer", "minimum": 0},
+          "housingPrice": {"type": "number", "minimum": 0},
+          "crews": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "weather": {
+      "type": "object", "required": ["snowStartMinute", "snowEndMinute", "intensity"],
+      "properties": {
+        "snowStartMinute": {"type": "number", "minimum": 0},
+        "snowEndMinute": {"type": "number", "minimum": 0},
+        "intensity": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "finance": {
+      "type": "object", "required": ["cash", "requiredReserve"],
+      "properties": {
+        "cash": {"type": "number", "minimum": 0},
+        "requiredReserve": {"type": "number", "minimum": 0}
+      }
+    },
+    "parameters": {"type": "object", "additionalProperties": {"type": "number"}},
+    "units": {"type": "object", "additionalProperties": {"type": "string"}},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "object"}
+  }
+}

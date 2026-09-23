@@ -25,6 +25,7 @@ from data_gate.composition import create_file_gate, default_store_dir
 from data_gate.domain.errors import DataGateError
 from data_gate.domain.model import PassportInput, SourceType
 
+OFFICIAL_SOURCE = files("data").joinpath("source-dataset.ru.txt")
 OFFICIAL_PASSPORT = PassportInput(
     dataset_id="official-v1",
     source_type=SourceType.SYNTHETIC,
@@ -52,8 +53,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _bootstrap(gate: DataGateService, args: argparse.Namespace) -> dict[str, Any]:
-    source = Path(args.source) if args.source else files("data").joinpath("source-dataset.ru.txt")
-    record = gate.create_import(source.read_bytes(), "source-text-v1", OFFICIAL_PASSPORT)
+    content = Path(args.source).read_bytes() if args.source else OFFICIAL_SOURCE.read_bytes()
+    record = gate.create_import(content, "source-text-v1", OFFICIAL_PASSPORT)
     snapshot = gate.publish(record.id)
     store = Path(args.store) if args.store else default_store_dir()
     out = Path(args.out) if args.out else store / "exports" / "official-v1.snapshot.json"
@@ -127,7 +128,7 @@ def _parser() -> argparse.ArgumentParser:
     sub = root.add_subparsers(required=True, metavar="command")
 
     p = sub.add_parser("bootstrap", help="исходник ТЗ → официальный снимок official-v1")
-    p.add_argument("--source", help="исходный файл (по умолчанию встроенный датасет)")
+    p.add_argument("--source", help="по умолчанию исходник из установленного пакета")
     p.add_argument("--out", help="куда экспортировать payload для движка")
     p.set_defaults(handler=_bootstrap)
 

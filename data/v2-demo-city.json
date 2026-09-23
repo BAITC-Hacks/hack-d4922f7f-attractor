@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "v2-city/1.0",
+  "mode": "dynamic-v2",
+  "status": "synthetic",
+  "currency": "KZT",
+  "basePeriod": "2026-01",
+  "startSimTime": "2026-01-01T00:00:00Z",
+  "districts": [
+    {
+      "id": "almaty",
+      "name": "Алматы",
+      "population": 1200,
+      "roadCapacity": 190,
+      "travelMinutes": 18,
+      "schoolCapacity": 250,
+      "housingUnits": 460,
+      "housingPrice": 25000000,
+      "crews": 2
+    },
+    {
+      "id": "baikonur",
+      "name": "Байконыр",
+      "population": 1350,
+      "roadCapacity": 190,
+      "travelMinutes": 20,
+      "schoolCapacity": 265,
+      "housingUnits": 510,
+      "housingPrice": 26000000,
+      "crews": 2
+    },
+    {
+      "id": "esil",
+      "name": "Есиль",
+      "population": 1500,
+      "roadCapacity": 190,
+      "travelMinutes": 22,
+      "schoolCapacity": 280,
+      "housingUnits": 560,
+      "housingPrice": 27000000,
+      "crews": 2
+    },
+    {
+      "id": "nura",
+      "name": "Нура",
+      "population": 1650,
+      "roadCapacity": 110,
+      "travelMinutes": 24,
+      "schoolCapacity": 295,
+      "housingUnits": 610,
+      "housingPrice": 28000000,
+      "crews": 1
+    },
+    {
+      "id": "saryarka",
+      "name": "Сарыарка",
+      "population": 1800,
+      "roadCapacity": 190,
+      "travelMinutes": 26,
+      "schoolCapacity": 310,
+      "housingUnits": 660,
+      "housingPrice": 29000000,
+      "crews": 2
+    },
+    {
+      "id": "sarayshyk",
+      "name": "Сарайшық",
+      "population": 1950,
+      "roadCapacity": 190,
+      "travelMinutes": 28,
+      "schoolCapacity": 325,
+      "housingUnits": 710,
+      "housingPrice": 30000000,
+      "crews": 2
+    }
+  ],
+  "weather": {
+    "snowStartMinute": 60,
+    "snowEndMinute": 360,
+    "intensity": 0.8
+  },
+  "finance": {
+    "cash": 100000000,
+    "requiredReserve": 1000000
+  },
+  "parameters": {},
+  "units": {
+    "population": "person",
+    "roadCapacity": "person-trip/15min",
+    "travelMinutes": "minute",
+    "schoolCapacity": "place",
+    "housingUnits": "dwelling",
+    "housingPrice": "KZT/dwelling",
+    "crews": "crew",
+    "cash": "KZT",
+    "requiredReserve": "KZT",
+    "intensity": "fraction"
+  },
+  "assumptions": [
+    "All populations, capacities, prices and causal coefficients are synthetic assumptions.",
+    "District names label a synthetic city; this is not a forecast or a real municipal budget.",
+    "Strategic periods use fixed 30-day model months, not calendar months."
+  ]
+}

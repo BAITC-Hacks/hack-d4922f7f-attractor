@@ -11,7 +11,7 @@ from engine.v1.infrastructure.json_snapshot import load_snapshot
 def create_official_service(
     snapshot_path: Path | None = None,
 ) -> SimulationService:
-    """Build the V1 service with the repository's official immutable snapshot."""
+    """Convenience/reference fixture; the HTTP composition uses published Data Gate data."""
     if snapshot_path is not None:
         return SimulationService(load_snapshot(snapshot_path))
     resource = files("data").joinpath("v1", "official-v1.snapshot.json")

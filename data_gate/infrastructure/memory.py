@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+
 from data_gate.domain.canonical import canonical_json
 from data_gate.domain.errors import ImmutabilityViolation
 from data_gate.domain.model import DatasetRef, ImportRecord, SnapshotRecord
@@ -24,13 +26,13 @@ class MemoryImportRepository:
         self._items: dict[str, ImportRecord] = {}
 
     def get(self, import_id: str) -> ImportRecord | None:
-        return self._items.get(import_id)
+        return deepcopy(self._items.get(import_id))
 
     def save(self, record: ImportRecord) -> None:
-        self._items[record.id] = record
+        self._items[record.id] = deepcopy(record)
 
     def list(self) -> list[ImportRecord]:
-        return sorted(self._items.values(), key=lambda r: (r.created_at, r.id))
+        return deepcopy(sorted(self._items.values(), key=lambda r: (r.created_at, r.id)))
 
 
 class MemorySnapshotRepository:
@@ -38,7 +40,7 @@ class MemorySnapshotRepository:
         self._items: dict[str, SnapshotRecord] = {}
 
     def get(self, snapshot_id: str) -> SnapshotRecord | None:
-        return self._items.get(snapshot_id)
+        return deepcopy(self._items.get(snapshot_id))
 
     def add(self, record: SnapshotRecord) -> None:
         existing = self._items.get(record.id)
@@ -46,13 +48,13 @@ class MemorySnapshotRepository:
             if canonical_json(snapshot_to_doc(existing)) != canonical_json(snapshot_to_doc(record)):
                 raise ImmutabilityViolation(f"Снимок {record.id} уже опубликован с другим содержимым")
             return
-        self._items[record.id] = record
+        self._items[record.id] = deepcopy(record)
 
     def list(self, dataset_id: str | None = None) -> list[SnapshotRecord]:
-        return sorted(
+        return deepcopy(sorted(
             (r for r in self._items.values() if dataset_id in (None, r.dataset_id)),
             key=lambda r: (r.published_at, r.id),
-        )
+        ))
 
 
 class MemoryRefRepository:

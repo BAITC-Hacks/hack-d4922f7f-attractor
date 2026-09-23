@@ -17,7 +17,7 @@ from engine.v1.domain.validation import validate_portfolio
 
 
 class SimulationService:
-    """Application boundary used by the future HTTP API and AI tools."""
+    """Framework-independent application boundary used by HTTP and read-only AI tools."""
 
     def __init__(self, snapshot: SimulationSnapshot) -> None:
         self._snapshot = snapshot

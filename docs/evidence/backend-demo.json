@@ -1,0 +1,29 @@
+{
+  "versions": {
+    "catalogVersion": "f128f39d8207472532dfcc86dba0a13a2714ad671e655c531d632ddc6961c50a",
+    "dataSnapshotId": "official-v1--eb4f0d95d9d7aa9b",
+    "modelVersion": "v1/1.0.0",
+    "rulesVersion": "1.0.0"
+  },
+  "score": 56.54307,
+  "cost": 95.0,
+  "delta": 3.9853900000000024,
+  "invalidScore": null,
+  "alternatives": [
+    {
+      "score": 57.205560000000006,
+      "cost": 100.0
+    },
+    {
+      "score": 56.985820000000004,
+      "cost": 86.0
+    },
+    {
+      "score": 56.875820000000004,
+      "cost": 92.0
+    }
+  ],
+  "analysisMode": "rule-based",
+  "analysisStatus": "not_configured",
+  "claimCount": 12
+}

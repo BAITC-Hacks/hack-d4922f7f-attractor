@@ -4,16 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "akim-simulation-engine"
-version = "0.1.0"
-description = "Deterministic simulation engine for AKIM"
+version = "0.3.0"
+description = "AKIM: deterministic simulation, Data Gate and evidence-backed API"
 requires-python = ">=3.11"
-dependencies = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "openai>=2,<4",
+                "psycopg[binary]>=3.2,<4", "openpyxl>=3.1,<4"]
 
 [project.optional-dependencies]
-test = ["httpx>=0.27"]
+test = ["httpx>=0.27,<1", "build>=1,<2", "jsonschema>=4,<5", "ruff>=0.11,<1"]
 
 [tool.setuptools.packages.find]
-include = ["engine*", "api*", "data_gate*", "data"]
+include = ["engine*", "data*", "services*", "ai*", "api*"]
 
 [tool.setuptools.package-data]
-data = ["source-dataset.ru.txt", "v1/*.json"]
+data = ["*.txt", "v1/*.json", "v2*.json"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

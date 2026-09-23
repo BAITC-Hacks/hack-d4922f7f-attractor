@@ -6,15 +6,15 @@
 
 ### Проверяемая лаборатория бюджетных решений для городского управления
 
-`Python 3.11+` &nbsp;·&nbsp; `Standard Library` &nbsp;·&nbsp; `JSON Schema` &nbsp;·&nbsp; `Clean Architecture`
+`Python 3.11+` · `FastAPI` · `React + TypeScript` · `Docker Compose`
 
-[Быстрый старт](#быстрый-старт) · [Архитектура](#архитектура) · [Результаты](#проверенные-результаты) · [API-first](#api-first-контракты) · [Что дальше](#что-дальше)
+[Запуск](#быстрый-старт) · [Демо](#демо-бэкенда) · [Архитектура](#архитектура) · [API](#api-first-контракты) · [Планы](#что-дальше)
 
 </div>
 
-> **Зачем это нужно:** городские решения конкурируют за один бюджет, а их эффект
-> трудно проверить до запуска. AKIM отделяет точный расчёт от объяснений, связывает
-> результат с версией данных и показывает, из чего сложилось изменение Score.
+> Городские решения конкурируют за один бюджет, а их эффект трудно проверить до
+> запуска. AKIM рассчитывает **Astana Quality of Life Score (AQOL)** по условию
+> «Аким на 5 часов» и показывает проверяемые причины изменения результата.
 
 ## Два режима
 
@@ -31,80 +31,194 @@ V1 сохраняет исходные правила без изменений.
 
 ## Текущий статус
 
-В `main` работают два независимых слоя: точный движок задания V1 и Data Gate.
-HTTP API, пользовательский интерфейс, AI-штаб и динамический V2 описаны контрактами
-и проектной документацией, но пока не входят в исполняемый продукт.
+Реализован **бэкенд V1**: API, evaluator, Data Gate, локальный поиск альтернатив,
+отчёт с evidence. Фронтенд из актуального main подключён к API через адаптер;
+Compose поднимает оба слоя. В этой ветке добавлен **бэкенд V2-demo**: отдельный
+worker, PostgreSQL, события, часы, checkpoint/ветки, парные эксперименты и экспорт.
+Фронтенд V2 разрабатывается отдельно и здесь **не изменён**. AI и альтернативы V1 пока доступны
+через API/Swagger, но не подключены к кнопкам текущего интерфейса.
+LLM-адаптер проверен тестовыми ответами; живой вызов провайдера в этом прогоне
+**не выполнялся**. Без ключа явно возвращается `mode: rule-based`.
 
-| Возможность | Что уже реализовано | Проверяемый результат |
+| Возможность | Реализация | Доказательство |
 | --- | --- | --- |
-| **Официальный V1 evaluator** | Лаги, эффекты, синергии, clip, районные оценки и итоговый Score | Контрольный портфель даёт **56.54307** |
-| **Валидатор решений** | Ровно 5 уникальных мер, бюджет, районы, направления и конфликты | Невалидный набор возвращает стабильные коды ошибок и `score: null` |
-| **Объяснимый результат** | Дельты районов и показателей, вклад среднего, минимума и штрафов | Итоговая дельта раскладывается в **+3.98539** |
-| **Data Gate** | Raw → mapping → quality report → preview → immutable snapshot | Официальный импорт проходит с **0 critical / 0 warning** |
-| **Версионирование данных** | Checksum, manifest, lineage, идемпотентный импорт и rollback | Повторный импорт не создаёт логический дубликат |
-| **Адаптеры источников** | Исходный текст задания, City JSON и GeoJSON WGS84 | Поддерживаются **3 формата** без сетевых зависимостей |
+| Расчёт AQOL | Эффекты, лаги, синергии, clip, штрафы и декомпозиция | Контрольный Score **56.54307** |
+| Проверка портфеля | Ровно 5 уникальных мер, бюджет ≤100, ≤2 мер одного направления, районы и конфликты | Невалидный набор получает `score: null` |
+| Data Gate → API | Исходник → quality report → опубликованный snapshot → evaluator | V1 закреплён за одним снимком |
+| Альтернативы | Перебор одной замены меры/района; фиксация решений | Найден вариант **57.20556** за **100** |
+| Объяснение | Сильные стороны, риски, последствия и проверенные предложения | Числа и формулировки берутся из серверного evidence |
+| API-first | OpenAPI, проверка версий, структурные ошибки | HTTP integration tests |
+| V2 «Снегопад» | 6 синтетических районов, транспортный спрос, бригады, очереди и обращения | `python -m scripts.demo_v2` |
+| V2 лаборатория | Сохраняемые прогоны, идемпотентные команды, replay, ветки, парные seed | Экспорт manifest/state/events + интервалы различий |
+| V2 стратегический прототип | Когорты и миграция, жильё, проекты, проводки, синтетические голосования | Балансы населения и денег; статус каждого модуля в `/v2/catalog` |
+
+Полная исследовательская платформа из ТЗ **не объявляется завершённой**:
+транспорт пока агрегированный, нет мультимодального графа, калибровки, модулей
+озеленения/безопасности и полного десятилетнего политико-бюджетного сценария.
+[Реализованное и ограничения V2](docs/V2-IMPLEMENTATION.md) ·
+[Контракт для фронтенда](docs/V2-API.md).
 
 ## Быстрый старт
 
-**Нужно:** Python 3.11+; внешние сервисы, пакеты и API-ключи не требуются.
+**Нужно:** запущенный Docker Desktop в режиме Linux containers (или Docker Engine)
+с Docker Compose v2.20+ (или v5), Git и интернет для первой сборки. Python/Node на хосте
+для этого способа не нужны. До merge используйте эту ветку:
 
 ```bash
-git clone https://github.com/BAITC-Hacks/hack-d4922f7f-attractor.git
+git clone --branch feat/v2-simulation https://github.com/BAITC-Hacks/hack-d4922f7f-attractor.git
 cd hack-d4922f7f-attractor
-python -m unittest discover -s tests -t .
-python -m data_gate bootstrap
+docker compose up --build -d --wait
 ```
 
-Тесты проверят движок и Data Gate. Команда `bootstrap` разберёт исходное условие,
-опубликует снимок `official-v1` и экспортирует payload в
-`var/data-gate/exports/official-v1.snapshot.json`. Повторный запуск идемпотентен.
+После клонирования запуск всего проекта — **одна последняя команда**, без обязательного
+`.env` и без ключей. Compose собирает `web` (React + nginx) и `api` (FastAPI +
+engine + Data Gate), `worker` V2 и `db` (PostgreSQL); ждёт healthcheck.
+База не публикует порт на хост. Для стабильного V1 без V2 сохранена ветка `fix/backend-readiness`.
+
+| Куда открыть | Что находится |
+| --- | --- |
+| [localhost:8080](http://localhost:8080) | Веб-интерфейс с живым API, не mock-расчётом |
+| [localhost:8000/docs](http://localhost:8000/docs) | Swagger: расчёт, альтернативы, анализ и Data Gate |
+| [localhost:8000/health](http://localhost:8000/health) | Готовность бэкенда и версии снимка |
+| [localhost:8000/v2/catalog](http://localhost:8000/v2/catalog) | V2: снимок, параметры, единицы, ограничения модулей |
+| [localhost:8000/v2/health](http://localhost:8000/v2/health) | Heartbeat отдельного worker V2 |
+
+Проверьте сквозной сценарий (каталог → расчёт → альтернативы → отчёт):
+
+```bash
+docker compose exec -T api python -m scripts.demo_backend
+docker compose exec -T api python -m scripts.demo_backend --url http://web/api
+docker compose exec -T api python -m scripts.demo_v2
+```
+
+Вторая команда проверяет также nginx-прокси, которым пользуется браузер.
+Ожидается `score: 56.54307`, `cost: 95`, `analysisMode: rule-based`.
+Третья воспроизводит снегопад, ветку с переброской бригады, сравнение по трём seed,
+evidence-отчёт и проверяет ZIP-экспорт. Она не вызывает платный LLM.
 
 <details>
-<summary>Минимальный вызов движка из Python</summary>
+<summary>Настройки, логи, остановка и повторный запуск</summary>
 
-```python
-from engine.v1 import Selection, create_official_service
+Необязательная настройка: скопируйте [.env.example](.env.example) в `.env`
+(PowerShell: `Copy-Item .env.example .env`; Linux/macOS: `cp .env.example .env`).
+Если файл уже есть, отредактируйте его — не перезаписывайте секреты.
 
-service = create_official_service()
-result = service.evaluate(
-    (
-        Selection("M7", "nura"),
-        Selection("M8", "nura"),
-        Selection("M10", "nura"),
-        Selection("M12"),
-        Selection("M5", "saryarka"),
-    )
-)
+`AKIM_WEB_PORT` и `AKIM_API_PORT` меняют порты хоста (по умолчанию 8080 и 8000).
+Например, если порт занят, задайте в `.env` `AKIM_WEB_PORT=8081` или `AKIM_API_PORT=8001`.
+Внутри контейнеров адреса не меняются. После изменения `.env` повторите команду запуска.
+Compose подставляет параметры из `.env`; переменные оболочки имеют приоритет.
 
-print(result.score)  # 56.54307
-print(result.to_api_dict())
+```bash
+docker compose ps
+docker compose logs --tail=100 api worker db
+docker compose down
+docker compose up --build -d --wait
+```
+
+`down` останавливает контейнеры, **но сохраняет данные** в named volumes `data-gate` и `v2-postgres`.
+Не добавляйте `-v`, если снимки/импорты нужны: `docker compose down -v` удаляет их.
+Не запускайте несколько API workers или параллельный CLI writer на этом volume.
+API работает от непривилегированного пользователя; наружу порты привязаны только к localhost.
+
+Если Docker недоступен, сначала запустите Docker Desktop и проверьте `docker version`.
+Если healthcheck не проходит, посмотрите `docker compose logs api`.
+Подложка карты загружается из внешнего сервиса и требует интернета; расчёт выполняет
+локальный API. Первая сборка скачивает образы, npm- и Python-зависимости.
+
+</details>
+
+### Запуск без Docker
+
+Нужно: Python **3.11+**, доступ к PyPI для установки. БД и ключ LLM для demo не нужны.
+Из корня клонированного [репозитория](https://github.com/BAITC-Hacks/hack-d4922f7f-attractor),
+PowerShell:
+
+```powershell
+python -m venv .venv
+.venv/Scripts/python -m pip install -c requirements.lock ".[test]"
+.venv/Scripts/python -m unittest discover -s tests -t .
+.venv/Scripts/python -m uvicorn services.api.app:app --host 127.0.0.1 --port 8000
+```
+
+<details>
+<summary>Linux / macOS</summary>
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -c requirements.lock ".[test]"
+.venv/bin/python -m unittest discover -s tests -t .
+.venv/bin/python -m uvicorn services.api.app:app --host 127.0.0.1 --port 8000
 ```
 
 </details>
 
+[Swagger UI](http://127.0.0.1:8000/docs) · [Каталог](http://127.0.0.1:8000/catalog).
+API сам импортирует и публикует официальный исходник. Хранилище:
+`var/data-gate` относительно текущего каталога. Запускать **один worker**.
+Для V2 запустите **ещё один терминал из того же каталога**:
+`.venv/Scripts/python -m engine.v2.infrastructure.worker`
+(Linux/macOS: `.venv/bin/python -m engine.v2.infrastructure.worker`).
+Без `AKIM_DATABASE_URL` API и worker используют локальный SQLite-файл
+`var/v2/state.sqlite3`; в Compose всегда используется PostgreSQL.
+`AKIM_RUN_TOKEN` защищает изменяющие V2-запросы; пустое значение допустимо только
+для локального однопользовательского демо. `AKIM_ADMIN_TOKEN` отдельно защищает Data Gate.
+Это запуск только API. Для локальной разработки интерфейса дополнительно нужны
+Node.js 22 и npm: в `apps/web` выполните `npm ci` и запустите `npm run dev` с
+`VITE_API_PROXY=true` в окружении. Без этого переключателя dev UI использует fixtures.
+В Compose нужный адрес `/api` встраивается автоматически при сборке.
+Основная точка входа — `services.api.app:app`; старый `api.main` оставлен как legacy,
+Compose его не запускает.
+
+## Демо бэкенда
+
+Во втором терминале, пока сервер запущен:
+
+```powershell
+.venv/Scripts/python -m scripts.demo_backend
+```
+
+Проверяются каталог/версии → контрольный расчёт → отказ неполному набору →
+альтернативы → evidence-backed report. Сохранённый реальный HTTP-прогон:
+[backend-demo.json](docs/evidence/backend-demo.json).
+
+Для `POST /v1/evaluate` в Swagger:
+
+```json
+{
+  "selections": [
+    {"measureId": "M7", "districtId": "nura"},
+    {"measureId": "M8", "districtId": "nura"},
+    {"measureId": "M10", "districtId": "nura"},
+    {"measureId": "M12", "districtId": null},
+    {"measureId": "M5", "districtId": "saryarka"}
+  ]
+}
+```
+
+Результат: `valid: true`, `cost: 95`, `score: 56.54307`. `aqolScore` — алиас Score.
+Для интеграции передавайте также `versions` целиком из `GET /catalog`.
+
 ## Архитектура
 
-Проект следует трёхслойной модели из [архитектурной спецификации](docs/02-architecture.md).
-Реализованные компоненты не зависят от будущего HTTP-фреймворка или интерфейса.
+| Слой | Ответственность | Реализация |
+| --- | --- | --- |
+| Аким / API | HTTP, доступ к импорту, версии, сборка use cases | `services/api` |
+| Город | Валидация, точный расчёт, локальные альтернативы | `engine/v1` |
+| Динамический город | Временные переходы, ledger, очереди, когорты, проекты | `engine/v2/domain` |
+| Прогоны и лаборатория | Команды, checkpoint, replay, ветвление, ансамбли | `engine/v2/application` |
+| Worker и хранилище | Отдельный процесс, атомарные пакеты, PostgreSQL; локально SQLite | `engine/v2/infrastructure` |
+| Данные | Парсеры, паспорт, quality gate, snapshots, lineage | `data_gate` |
+| AI-аналитик | Выбор подтверждённых фактов, read-only tools, fallback | `ai` |
 
-| Слой | Ответственность | Текущая реализация | Граница интеграции |
-| --- | --- | --- | --- |
-| **Аким** | Команды, сравнение сценариев, AI-объяснение | Контракты и сценарии описаны в `docs/`; UI и AI ещё не в `main` | JSON Schema и будущий HTTP API |
-| **Город** | Проверка решений, эффекты, Score, декомпозиция | `engine/v1/domain` + `engine/v1/application` | `SimulationService` |
-| **Данные** | Импорт, качество, происхождение, снимки | `data_gate/domain` + `data_gate/application` | `DataGateService` и snapshot payload |
+Домен/application движка не импортируют FastAPI, OpenAI SDK или Data Gate.
+Composition root `services/api/runtime.py` переводит опубликованный payload в
+immutable модель. Пользовательские импорты не подменяют официальный V1.
+`create_official_service()` оставлен как загрузчик эталонного fixture.
 
-Поток данных уже замкнут: Data Gate переводит исходный файл в неизменяемый снимок,
-а движок читает тот же payload без знания о файловом хранилище или парсере. Контрактный
-тест подтверждает совпадение ручного и опубликованного снимков.
-
-Технические задания для будущих иллюстраций архитектуры вынесены отдельно:
-[docs/README-VISUALS.md](docs/README-VISUALS.md). В файле указаны композиция,
-точные подписи, промпты, размеры и места вставки — без Mermaid-заглушек в README.
+Брифы для будущих изображений: [README-VISUALS.md](docs/README-VISUALS.md).
+Целевая архитектура с V2: [docs/02-architecture.md](docs/02-architecture.md).
 
 ## Как считается V1
-
-Пользователь выбирает ровно пять мер. Application layer сначала запускает доменный
-валидатор; только допустимый набор попадает в чистую функцию расчёта.
 
 ```text
 I′ = clip(I + Σ effect × (8 − lag) / 8 + synergy, 0, 100)
@@ -112,130 +226,168 @@ Ddistrict = Σ weight × I′
 Score = 0.7 × Davg + 0.3 × min(Ddistrict) − Ncritical
 ```
 
-Округление не выполняется между шагами. Остаток бюджета не даёт бонуса, критическим
-считается значение строго ниже 40, а LLM не участвует в вычислении чисел.
-Полная спецификация и контрольные примеры — в
-[docs/03-v1-reference-model.md](docs/03-v1-reference-model.md).
+Нужно **ровно пять мер, не больше двух одного направления**, а не по одной каждой
+категории. Промежуточные значения не округляются. Критичность — строго ниже 40;
+остаток бюджета бонуса не даёт. LLM не считает Score.
+[Полная спецификация](docs/03-v1-reference-model.md).
 
 ## Проверенные результаты
 
-Все значения ниже получены на актуальном `main` командой из быстрого старта.
+Локально: Windows/Python 3.12.10; проверены Linux-контейнеры через Docker Desktop.
+CI для Python 3.11/3.12 и Compose добавлен; удалённый результат пока не подтверждён.
 
-| Наблюдение | Результат | Практический вывод |
-| --- | --- | --- |
-| Автоматическая проверка | **62 теста проходят** | Правила движка, импорт, качество, rollback и контракт слоёв проверяются вместе |
-| Базовое состояние без мер | **52.55768** | Это диагностическая база, а не допустимый портфель |
-| Контрольный портфель стоимостью 95 | **56.54307** | Реализация совпадает с эталонным расчётом с допуском `1e-8` |
-| Декомпозиция прироста | **+0.85064 +1.13475 +2 = +3.98539** | Видно влияние среднего, худшего района и снятых штрафов |
-| Официальный импорт Data Gate | **0 critical, 0 warning** | Снимок можно публиковать без скрытых исправлений |
-| Размер исходной модели | **5 районов · 10 показателей · 14 мер** | Каталог проверяется поле за полем против условия |
+| Проверка | Результат |
+| --- | --- |
+| Автотесты | **140 Python** (139 общий запуск + 1 новый контрактный отдельно), **3 Node**; без многократного полного прогона |
+| База без мер (диагностика) | **52.55768** |
+| Контрольный портфель за 95 | **56.54307** |
+| Декомпозиция прироста | **+0.85064 +1.13475 +2 = +3.98539** |
+| Лучшая найденная локальная альтернатива | **57.20556**, стоимость **100** |
+| Официальный импорт | **0 critical / 0 warning** |
+| Установка | `pip install`, сборка wheel, ресурсы и HTTP smoke вне checkout |
+| Статические проверки | Ruff, `pip check`, синхронизация OpenAPI |
+| Docker Compose | API, worker, PostgreSQL и web healthy; V1 через nginx и V2 HTTP-demo прошли |
+| V2, три парных seed | Медиана изменения `service-unavailability-hours`: **−68.8702**, p05…p95 **−70.8670…−63.4259**; дополнительный расход **5 000 модельных KZT** |
+
+V2-числа — результат **синтетического** опыта за 840 модельных минут, а не прогноз
+реального города. Интервал по трём seed иллюстрирует воспроизводимость, но слишком мал
+для исследовательского вывода. Полный протокол и исходы: [v2-demo.json](docs/evidence/v2-demo.json).
+Бюджет выполним в обеих ветках; равенство фактических расходов **не заявляется**.
 
 ## API-first контракты
 
-HTTP-сервер ещё не подключён. Бизнес-логика уже оформлена как framework-independent
-use cases, а JSON Schema фиксируют будущие запросы и ответы.
+| Endpoint | Назначение |
+| --- | --- |
+| `GET /health`, `GET /catalog` | Готовность, каталог, правила, версии, manifest |
+| `POST /v1/validate` | Валидация без LLM |
+| `POST /v1/evaluate` | Расчёт; неправильный портфель → 200 с `valid: false` |
+| `POST /v1/alternatives` | Одна замена; `fixedSelections`, `allowedDistricts`, `resultLimit` |
+| `POST /v1/analysis` | Отчёт с evidence, явными `mode` и статусом fallback |
+| `POST /datasets/imports` | Текстовый импорт с паспортом; admin token |
+| `GET /datasets/imports/{id}/report` | Report, mapping, preview; admin token |
+| `POST /datasets/imports/{id}/publish` | Публикация с принятием warnings; admin token |
+| `GET /datasets` | Наборы и manifest; admin token |
+| `GET /v2/catalog`, `GET /v2/health` | Данные/допущения V2 и состояние worker |
+| `POST /scenarios`, `POST /runs` | Immutable-сценарий и отдельный прогон с seed |
+| `POST /runs/{id}/commands` | Часы и управленческие решения; версия и idempotency key |
+| `POST /runs/{id}/checkpoints`, `/branches`, `/replay` | Сохранение, ветки и проверка воспроизводимости |
+| `GET /runs/{id}/events`, `/metrics`, `/trace/{eventId}` | SSE с cursor, ряды, evidence и причинная трасса |
+| `GET /runs/{id}/population`, `/development`, `/flows`, `/politics` | Стратегические подсистемы и проводки |
+| `POST /experiments`, `GET /experiments/{id}` | Асинхронные парные ансамбли; эмпирические интервалы |
+| `POST /assistant/messages`, `GET /runs/{id}/export` | Rule-based evidence-отчёт V2 и ZIP воспроизведения |
 
-| Будущий endpoint | Готовая точка входа | Контракт |
-| --- | --- | --- |
-| `POST /v1/validate` | `SimulationService.validate()` | `v1-evaluate.request.schema.json` → `v1-validate.result.schema.json` |
-| `POST /v1/evaluate` | `SimulationService.evaluate()` | `v1-evaluate.request.schema.json` → `v1-result.schema.json` |
-| `POST /datasets/imports` | `DataGateService.create_import()` | `data-gate-import.report.schema.json` |
-| `GET /datasets/imports/{id}/report` | `DataGateService.get_report()` | `data-gate-import.report.schema.json` |
-| `POST /datasets/imports/{id}/publish` | `DataGateService.publish()` | `data-gate-snapshot.manifest.schema.json` |
+Неверная структура → 422; устаревшие версии / запрещённая публикация → 409;
+нет доступа → 403; body >1 200 000 байт → 413.
+Ошибки: `error: {code, field, message}`.
+[Контракты и расхождения с черновым frontend-клиентом](packages/contracts/README.md).
 
-Все схемы находятся в [`packages/contracts`](packages/contracts). Ошибки обоих слоёв
-используют форму `{code, field, message}`. Невалидный официальный портфель не получает
-числовой Score, а критическая ошибка данных блокирует публикацию.
+## AI и конфигурация
+
+LLM выбирает/упорядочивает готовые evidence IDs. Сервер проверяет категорию,
+обязательные риски и полноту, затем подставляет собственные числа и фразы.
+Это ограниченный evidence-аналитик, не свободный городской агент.
+Невалидный ответ: один repair, затем шаблон. Ошибка провайдера не ломает расчёт.
+
+| Переменная | Назначение |
+| --- | --- |
+| `AKIM_WEB_PORT`, `AKIM_API_PORT` | Порты Compose на localhost: по умолчанию 8080 и 8000 |
+| `AKIM_DATA_GATE_DIR` | Путь при прямом Python-запуске; Compose фиксирует путь persistent volume |
+| `AKIM_CORS_ORIGINS` | Разрешённые адреса UI через запятую; по умолчанию закрыто |
+| `AKIM_ADMIN_TOKEN` | Bearer token для Data Gate; без него HTTP-доступ закрыт |
+| `AKIM_RUN_TOKEN` | Bearer token для управления V2; пустой только для локального demo |
+| `AKIM_DB_PASSWORD` | Пароль внутренней PostgreSQL Compose; demo-default не для production |
+| `AKIM_DATABASE_URL`, `AKIM_V2_STORE` | PostgreSQL URL либо SQLite-файл при запуске без Compose |
+| `AKIM_CODE_REVISION` | Метка сборки/commit в manifest; задайте при выпуске |
+| `AKIM_LLM_ENABLED=1` | Явное включение платных запросов |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | Ключ и доступная Responses-модель с tools/structured outputs |
+| `AKIM_LLM_MAX_ANALYSES` | Анализов на процесс: по умолчанию 10, максимум 100 |
+
+[.env.example](.env.example) — шаблон для необязательного `.env`. **Compose читает
+`.env` автоматически**, прямой Python — нет (экспортируйте переменные в оболочку).
+Ключи не коммитьте: `.env` исключён из Git и Docker build context. Лимиты LLM: один одновременный
+анализ, deadline 20 секунд, ≤3 вызовов включая repair, ≤800 output tokens/вызов;
+SDK retries отключены. Это не денежный лимит: настройте бюджет проекта провайдера.
 
 ## Data Gate
 
-| Формат | Назначение | Основные проверки |
-| --- | --- | --- |
-| `source-text-v1` | Исходное русскоязычное условие задачи | Структура, контрольные числа, Unicode minus, стабильные ID |
-| `city-json-v1` | Готовый снимок для движка | Схема, диапазоны, веса, доли населения, ссылки мер |
-| `geojson-v1` | Районы, здания, дороги, светофоры и зелень | WGS84, геометрия, `id`, `properties.layer`, ссылки районов |
+Поддержаны исходник задания, City JSON, GeoJSON WGS84, синтетический V2 City,
+CSV/XLSX/JSON для нормализованных наблюдений с единицами, provenance и тремя временами.
+Это определённые схемы, не автоматическое понимание произвольной таблицы. Дубли JSON-ключей,
+NaN/Infinity, неверные типы/даты/ссылки не исправляются молча. Критические ошибки
+блокируют публикацию; checksum staging и snapshot проверяется при чтении.
+Идентичность импорта учитывает байты, формат, паспорт и transform version.
 
-Хранилище по умолчанию находится в `var/data-gate/`. Путь можно переопределить
-переменной `AKIM_DATA_GATE_DIR`. Полные CLI-команды и правила качества описаны в
-[data_gate/README.md](data_gate/README.md).
+```powershell
+.venv/Scripts/python -m data_gate --store var/data-gate bootstrap
+```
+
+[CLI и правила миграции](data_gate/README.md).
 
 ## Структура проекта
 
 ```text
-engine/v1/          доменная модель, валидатор, evaluator и application service
-data_gate/          импорт, quality gate, immutable snapshots и CLI
-packages/contracts/ JSON Schema для API-first интеграции
-data/               исходное условие и официальный V1 snapshot
-tests/v1/           golden, validation, boundary и property tests движка
-tests/data_gate/    parser, quality, lifecycle, storage и engine contract tests
-docs/               продукт, архитектура, V2, AI и исследовательский протокол
+engine/v1/          правила, evaluator, application service, локальный search
+engine/v2/domain/   scheduler и чистые переходы синтетического города
+engine/v2/application/ прогоны, команды, checkpoint, ветки, replay, эксперименты
+engine/v2/infrastructure/ Data Gate adapter, PostgreSQL/SQLite, отдельный worker
+data_gate/          import, quality, snapshots, файловые/in-memory adapters, CLI
+services/api/       HTTP-модели, маршруты, доступ, composition root
+ai/                 evidence policy и Responses adapter
+packages/contracts/ domain JSON Schema и генерируемый OpenAPI
+data/               исходник и эталонный fixture (входят в wheel)
+tests/              golden, regression, integration, search, AI contract tests
+scripts/            HTTP demo, OpenAPI export, wheel smoke
+apps/web/           React UI и адаптер HTTP-контрактов
+compose.yaml        API + worker + PostgreSQL + существующий web; volumes и healthchecks
+deploy/             nginx reverse proxy для web → API
+docs/               спецификации, аудит, evidence
 assets/             логотип и будущие изображения README
 ```
 
-## Документация
-
-1. [Продукт и пользовательские сценарии](docs/01-product.md)
-2. [Архитектура трёх слоёв и API](docs/02-architecture.md)
-3. [Точная спецификация V1](docs/03-v1-reference-model.md)
-4. [Динамическая агентная модель V2](docs/04-v2-simulation.md)
-5. [Data Gate и происхождение данных](docs/05-data-gate.md)
-6. [AI, жители и обращения](docs/06-ai-and-interactions.md)
-7. [Исследовательская проверка](docs/07-research-validation.md)
-8. [Этапы и критерии приёмки](docs/08-delivery-plan.md)
-9. [Брифы для изображений README](docs/README-VISUALS.md)
-
 ## Что дальше
 
-**Ближайшее — неделя**
+**Перед защитой:** подключить кнопки AI/альтернатив, записать демо, проверить живую LLM-модель
+и сравнить пользу с rule-based baseline, получить зелёный CI. Сроки не зафиксированы.
 
-- Подключить тонкий FastAPI-слой к `SimulationService` и `DataGateService`, сохранив
-  текущие JSON Schema единственным внешним контрактом.
-- Добавить CI-команду `python -m unittest discover -s tests -t .`; локальный прогон
-  уже не требует установки зависимостей.
-- Сгенерировать четыре схемы по [готовым брифам](docs/README-VISUALS.md) и заменить
-  текстовые архитектурные пояснения визуальными артефактами.
+**Следующий этап:** расширить `engine/v2/domain` графом маршрутов и полным бюджетным
+циклом; вынести event log из JSON-документа в отдельную PostgreSQL-таблицу, добавить
+RBAC и измерить задержки на длинном горизонте. Очередь, worker и replay уже есть.
 
-**Следующий шаг — квартал**
-
-- Реализовать P3: scheduler, стабильный порядок событий, ledger, checkpoint и replay
-  в отдельном `engine/v2`, не изменяя официальный Score V1.
-- Собрать первый вертикальный срез: снегопад → транспорт и службы → обращения →
-  управленческая команда → сравнение с веткой без вмешательства.
-- Добавить CSV/XLSX/Parquet adapters через существующий порт `SourceParser` и вынести
-  файловые repositories Data Gate в PostgreSQL-адаптеры без изменения домена.
-
-**Куда это растёт**
-
-- Первым ограничением файлового Data Gate станет конкурентная запись; порты хранилищ
-  уже позволяют заменить её PostgreSQL и объектным хранилищем.
-- После появления исторических данных модель перейдёт от условных сценариев к
-  калибровке, holdout-проверке и ансамблям с управляемыми RNG-потоками.
-- Очередь worker-процессов вводится только после измерения длительности тика, backlog,
-  памяти и требуемого масштаба — без преждевременного разбиения на микросервисы.
+**Дальше:** реальные разрешённые данные, калибровка/holdout, новые `SourceParser`
+adapters и анализ параметрической неопределённости поверх ансамблей V2.
+Первое ограничение роста — размер полного run-документа и журналов; масштабирование
+обосновывается измерениями, не числом нарисованных агентов.
 
 ## Ограничения
 
-- V1 воспроизводит синтетическое условие хакатона; результат не является прогнозом
-  реального города и не доказывает причинный эффект меры.
-- В `main` пока нет HTTP API, интерфейса, LLM-интеграции или динамики V2. AI не нужен
-  для расчётов и не должен становиться источником чисел.
-- Data Gate использует локальное файловое хранилище и три адаптера. CSV, XLSX,
-  Parquet, реальные обращения и временные ряды V2 ещё не реализованы.
-- Отдельный файл лицензии и состав команды пока не опубликованы в репозитории.
+- V1 — синтетическое задание, не прогноз и не доказательство причинного эффекта.
+- Поиск локальный: глобальный максимум не заявляется.
+- Live LLM и пользовательские исследования не подтверждены этим прогоном.
+  UI собирается и связан с API; это ещё не полная UX-приёмка.
+- V2 — **частичный V2-demo**, не полная реализация всех MUST ТЗ. Коридорное время
+  поездки — модельный proxy, не измеренный P90; интервалы seed не являются confidence interval.
+  В стратегическом режиме услуги агрегируются по суткам, месяц равен 30 дням.
+  Субсуточную погоду проверяйте в оперативном режиме.
+- Файловый Data Gate: один процесс-писатель; не запускайте CLI/API одновременно
+  на одном хранилище. Lock API не заменяет межпроцессные транзакции.
+- Нет готового публичного production deployment, RBAC, постоянного бюджета LLM
+  или нагрузочного отчёта. Compose — локальный demo-профиль, не production.
+- `npm audit` обнаруживает critical XSS в пришедшем из main `maplibre-gl@5.24.0`
+  ([GHSA-jrc7-96c5-q579](https://github.com/maplibre/maplibre-gl-js/security/advisories/GHSA-jrc7-96c5-q579)).
+  Исправление начинается с 6.4.1; перед публичным показом нужен проверенный major upgrade.
+  Внешний стиль карты использует затронутый attribution-путь; localhost не устраняет XSS.
+- Отдельная лицензия, состав команды и видео защиты пока не опубликованы.
 
-## Соответствие критериям хакатона
+## Документация
 
-| Критерий | Доказательство в репозитории |
-| --- | --- |
-| Работоспособность | Быстрый старт, **62 теста**, CLI Data Gate и контрольный Score |
-| Техническая реализация | Clean Architecture, immutable snapshots, стабильные контракты и декомпозиция |
-| Воспроизводимость | Только Python stdlib, запуск без ключей, golden fixtures и checksum данных |
-| Ценность | Ограничения бюджета проверяются серверным ядром, результат объясняется через дельты |
-| Потенциал развития | Изолированные V1/Data Gate boundaries и поэтапный план V2 без подмены готового функционала |
+[Продукт](docs/01-product.md) · [Архитектура](docs/02-architecture.md) ·
+[V1](docs/03-v1-reference-model.md) · [V2](docs/04-v2-simulation.md) ·
+[Данные](docs/05-data-gate.md) · [AI](docs/06-ai-and-interactions.md) ·
+[Исследования](docs/07-research-validation.md) · [План](docs/08-delivery-plan.md).
 
----
+Оценка по обеим рубрикам, исправления и приоритеты:
+[BACKEND-AUDIT.md](docs/BACKEND-AUDIT.md).
 
-Исходные данные синтетические и предоставлены в условии задачи
-[«Аким на 5 часов»](data/source-dataset.ru.txt). Термин «исследовательская платформа»
-означает воспроизводимые гипотезы и прозрачные допущения, а не подтверждённую точность
-на реальном городе.
+Данные предоставлены в [условии задачи](data/source-dataset.ru.txt).
+«Исследовательская платформа» означает воспроизводимые гипотезы и прозрачные
+допущения, а не подтверждённую точность на реальном городе.

@@ -1,4 +1,4 @@
-import type { Alternative, Catalog, District, Evaluation, Issue, Measure, Selection } from "../domain/types";
+import type { Catalog, District, Evaluation, Issue, Measure, Selection } from "../domain/types";
 import type { V1Api } from "../application/ports";
 
 const configuredBaseUrl = (
@@ -31,6 +31,38 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 function list(value: unknown): unknown[] { return Array.isArray(value) ? value : []; }
 function number(value: unknown, fallback = 0): number { return typeof value === "number" && Number.isFinite(value) ? value : fallback; }
 function text(value: unknown, fallback = ""): string { return typeof value === "string" ? value : fallback; }
+function numericEntries(value: unknown): Array<[string, number]> {
+  return Object.entries(asRecord(value) ?? {}).filter((entry): entry is [string, number] =>
+    typeof entry[1] === "number" && Number.isFinite(entry[1]));
+}
+
+function normalizeEffects(value: unknown): Record<string, number> | undefined {
+  if (asRecord(value)) return Object.fromEntries(numericEntries(value));
+  if (!Array.isArray(value)) return undefined;
+  return Object.fromEntries(value.flatMap((effect) => {
+    const row = asRecord(effect);
+    return typeof row?.indicatorId === "string" && typeof row.points === "number" && Number.isFinite(row.points)
+      ? [[row.indicatorId, row.points]] : [];
+  }));
+}
+
+function normalizeIndicators(value: unknown): Evaluation["indicators"] {
+  // The engine returns district -> indicator -> value; legacy responses use after rows.
+  if (Array.isArray(value)) return value.flatMap((entry) => {
+    const row = asRecord(entry) ?? {};
+    if (asRecord(row.after)) return numericEntries(row.after).map(([id, amount]) =>
+      ({ name: `${text(row.districtId)}.${id}`, value: amount }));
+    return typeof row.name === "string" && typeof row.value === "number" && Number.isFinite(row.value)
+      ? [{ name: row.name, value: row.value }] : [];
+  });
+  const record = asRecord(value);
+  if (!record) return undefined;
+  if (Object.values(record).some((entry) => asRecord(entry))) {
+    return Object.entries(record).flatMap(([districtId, indicators]) =>
+      numericEntries(indicators).map(([id, amount]) => ({ name: `${districtId}.${id}`, value: amount })));
+  }
+  return Object.fromEntries(numericEntries(record));
+}
 
 function normalizeCatalog(raw: unknown): Catalog {
   const root = asRecord(raw) ?? {};
@@ -44,7 +76,7 @@ function normalizeCatalog(raw: unknown): Catalog {
       direction: text(item.direction ?? item.category, "Другое"),
       scope: ["city", "город", "urban"].includes(scopeText) ? "city" : "district",
       cost: number(item.cost ?? item.price), lag: number(item.lagQuarters ?? item.lag),
-      effects: asRecord(item.effects) as Record<string, number> | undefined,
+      effects: normalizeEffects(item.effects),
     };
   }).filter((value): value is Measure => value !== null && Boolean(value.id));
   const districts = list(data.districts).map((value): District | null => {
@@ -79,21 +111,28 @@ function normalizeEvaluation(raw: unknown): Evaluation {
   const scoreValue = data.score;
   const decomposition = asRecord(data.decomposition);
   const delta = asRecord(decomposition?.delta);
+  const decompositionValues = delta ? numericEntries(delta) : Object.entries(decomposition ?? {}).flatMap(([key, value]) => {
+    const change = asRecord(value)?.delta;
+    const name = key === "criticalPenalty" ? "criticalPenaltyContribution" : key === "total" ? "score" : key;
+    return typeof change === "number" && Number.isFinite(change) ? [[name, change] as [string, number]] : [];
+  });
+  const districtScores = data.districtScores ?? data.district_scores;
   return {
     valid: data.valid === true,
     issues,
     cost: number(data.cost ?? data.totalCost),
     remainingBudget: number(data.remainingBudget ?? data.remaining_budget),
-    score: typeof scoreValue === "number" ? scoreValue : null,
+    score: typeof scoreValue === "number" && Number.isFinite(scoreValue) ? scoreValue : null,
     average: number(data.average ?? data.dAvg ?? data.d_avg, NaN),
     minimum: number(data.minimum ?? data.minDistrictScore ?? data.minimum_district_score, NaN),
     criticalCount: number(data.criticalCount ?? data.critical_count, NaN),
-    districtScores: list(data.districtScores ?? data.district_scores).map((item) => {
+    districtScores: asRecord(districtScores) ? numericEntries(districtScores).map(([districtId, score]) =>
+      ({ districtId, score })) : list(districtScores).map((item) => {
       const row = asRecord(item) ?? {};
       return { districtId: text(row.districtId ?? row.district_id ?? row.id), district: text(row.district ?? row.name), score: number(row.score ?? row.value) };
     }),
-    decomposition: delta ? Object.fromEntries(Object.entries(delta).filter((entry): entry is [string, number] => typeof entry[1] === "number")) : undefined,
-    indicators: (asRecord(data.indicators) ?? (Array.isArray(data.indicators) ? data.indicators : undefined)) as Evaluation["indicators"],
+    decomposition: decompositionValues.length ? Object.fromEntries(decompositionValues) : undefined,
+    indicators: normalizeIndicators(data.indicators),
     explanation: text(data.explanation ?? data.summary),
   };
 }

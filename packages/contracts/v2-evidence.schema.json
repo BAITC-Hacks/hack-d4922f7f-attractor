@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:evidence",
+  "title": "Server-derived evidence tied to a run, unit and model time window",
+  "type": "object",
+  "required": ["id", "runId", "metric", "unit", "window", "value", "status", "districtId", "sourceIds"],
+  "properties": {
+    "id": {"type": "string"}, "runId": {"type": "string"}, "metric": {"type": "string"},
+    "unit": {"type": "string"},
+    "window": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string", "format": "date-time"}},
+    "value": {"type": ["number", "null"]},
+    "status": {"const": "simulated"},
+    "districtId": {"type": ["string", "null"]},
+    "sourceIds": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -4,7 +4,6 @@ from dataclasses import replace
 from pathlib import Path
 
 from engine.v1 import create_official_service
-from engine.v1.application.service import SimulationService
 from engine.v1.domain.model import District, Selection, immutable_numbers
 from engine.v1.domain.scoring import calculate_score
 

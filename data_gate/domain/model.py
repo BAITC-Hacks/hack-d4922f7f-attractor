@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field, replace
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Mapping
 
@@ -9,7 +10,7 @@ from data_gate.domain.errors import InvalidPassport
 
 DATASET_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 SCHEMA_VERSION = "1"
-TRANSFORM_VERSION = "data-gate/1.0.0"
+TRANSFORM_VERSION = "data-gate/1.1.0"
 
 
 class Severity(str, Enum):
@@ -99,14 +100,28 @@ class PassportInput:
     usage_restrictions: str = "none"
 
     def __post_init__(self) -> None:
-        if not DATASET_ID_PATTERN.match(self.dataset_id):
+        if not isinstance(self.dataset_id, str) or not DATASET_ID_PATTERN.fullmatch(self.dataset_id):
             raise InvalidPassport(
                 "dataset_id: только a-z, 0-9 и '-', до 64 символов",
                 field="datasetId",
             )
         for name in ("source_uri", "license_or_permission", "retrieved_at", "valid_from"):
-            if not str(getattr(self, name)).strip():
+            if not isinstance(getattr(self, name), str) or not getattr(self, name).strip():
                 raise InvalidPassport(f"{name} обязателен", field=name)
+        if not isinstance(self.source_type, SourceType):
+            raise InvalidPassport("Некорректный sourceType", field="sourceType")
+        dates = {}
+        for name in ("retrieved_at", "valid_from", "valid_to"):
+            value = getattr(self, name)
+            if name == "valid_to" and value is None:
+                continue
+            try:
+                parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                dates[name] = parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
+            except (ValueError, TypeError, AttributeError) as error:
+                raise InvalidPassport("Нужна дата ISO-8601", field=name) from error
+        if self.valid_to is not None and dates["valid_to"] < dates["valid_from"]:
+            raise InvalidPassport("validTo раньше validFrom", field="validTo")
 
     @classmethod
     def from_api_dict(cls, raw: Mapping[str, Any]) -> "PassportInput":
@@ -129,7 +144,7 @@ class PassportInput:
             )
         except KeyError as error:
             raise InvalidPassport(f"не хватает поля {error.args[0]}", field=error.args[0]) from error
-        except ValueError as error:
+        except (ValueError, TypeError) as error:
             raise InvalidPassport(str(error), field="sourceType") from error
 
 

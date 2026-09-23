@@ -1,0 +1,1501 @@
+{
+  "mode": "dynamic-v2",
+  "dataStatus": "synthetic-not-calibrated",
+  "modelVersion": "v2-demo/1.0",
+  "dataSnapshotId": "synthetic-v2-demo--f01bc52eed4f109d",
+  "scenarioId": "scenario-ace4821f8f36e961d25a7091",
+  "runId": "run-75c117be4c3e7109e9bf4d0e",
+  "checkpointId": "checkpoint-e5976aa6eba0b835ec515894",
+  "simMinute": 840,
+  "branches": [
+    {
+      "runId": "run-5b142dad3dc9c252c1280dfd",
+      "metrics": [
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2444",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "service-unavailability-hours",
+          "unit": "service-hour",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 189.1740417061207,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2445",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "backlog",
+          "unit": "job",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 0.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2446",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "travel-time-p90",
+          "unit": "minute",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 42.224999999999994,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2447",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "population",
+          "unit": "person",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 9450.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2448",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "expenditure",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 739200.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2449",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "cash",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 99260800.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        },
+        {
+          "id": "run-5b142dad3dc9c252c1280dfd:metric:2450",
+          "runId": "run-5b142dad3dc9c252c1280dfd",
+          "metric": "available-to-commit",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 98260800.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001360",
+            "event-000001363",
+            "event-000001366",
+            "event-000001369",
+            "event-000001372",
+            "event-000001375"
+          ]
+        }
+      ]
+    },
+    {
+      "runId": "run-a1400b85d0c6681d5aa883e9",
+      "metrics": [
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2444",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "service-unavailability-hours",
+          "unit": "service-hour",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 127.36564138883553,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2445",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "backlog",
+          "unit": "job",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 0.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2446",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "travel-time-p90",
+          "unit": "minute",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 42.224999999999994,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2447",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "population",
+          "unit": "person",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 9450.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2448",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "expenditure",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 744200.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2449",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "cash",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 99255800.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        },
+        {
+          "id": "run-a1400b85d0c6681d5aa883e9:metric:2450",
+          "runId": "run-a1400b85d0c6681d5aa883e9",
+          "metric": "available-to-commit",
+          "unit": "KZT",
+          "window": [
+            "2026-01-01T00:00:00+00:00",
+            "2026-01-01T14:00:00+00:00"
+          ],
+          "value": 98255800.0,
+          "status": "simulated",
+          "districtId": null,
+          "sourceIds": [
+            "event-000001362",
+            "event-000001365",
+            "event-000001368",
+            "event-000001371",
+            "event-000001374",
+            "event-000001377"
+          ]
+        }
+      ]
+    }
+  ],
+  "intervention": {
+    "type": "crew.reassign",
+    "payload": {
+      "crewId": "crew-almaty-1",
+      "districtId": "nura"
+    }
+  },
+  "causalTrace": {
+    "events": [
+      {
+        "id": "event-000000600",
+        "seq": 600,
+        "type": "weather.end",
+        "actorId": null,
+        "payload": {
+          "unit": "fraction",
+          "intensity": 0
+        },
+        "causedBy": [],
+        "simMinute": 360,
+        "districtId": null,
+        "payloadSchemaVersion": "1.0"
+      },
+      {
+        "id": "event-000000967",
+        "seq": 967,
+        "type": "transport.capacity",
+        "actorId": null,
+        "payload": {
+          "unit": "person-trip/15min",
+          "capacity": 190.0,
+          "snowIntensity": 0
+        },
+        "causedBy": [
+          "event-000000600"
+        ],
+        "simMinute": 525,
+        "districtId": "saryarka",
+        "payloadSchemaVersion": "1.0"
+      },
+      {
+        "id": "event-000000968",
+        "seq": 968,
+        "type": "transport.experience",
+        "actorId": null,
+        "payload": {
+          "unit": "minute",
+          "unmet": 0.0,
+          "demand": 180.0,
+          "served": 180.0,
+          "tripUnit": "person-trip",
+          "travelTimeP90": 29.141522855103933,
+          "routeAvailable": true
+        },
+        "causedBy": [
+          "event-000000967"
+        ],
+        "simMinute": 525,
+        "districtId": "saryarka",
+        "payloadSchemaVersion": "1.0"
+      },
+      {
+        "id": "event-000000969",
+        "seq": 969,
+        "type": "service.queue",
+        "actorId": null,
+        "payload": {
+          "unit": "job",
+          "after": 0.0,
+          "before": 0.0,
+          "arrivals": 0.0,
+          "completed": 0.0,
+          "fundingFraction": 1.0
+        },
+        "causedBy": [
+          "event-000000968",
+          "event-000000600"
+        ],
+        "simMinute": 525,
+        "districtId": "saryarka",
+        "payloadSchemaVersion": "1.0"
+      },
+      {
+        "id": "event-000000971",
+        "seq": 971,
+        "type": "appeal.created",
+        "actorId": "resident-saryarka-adults-004",
+        "payload": {
+          "topic": "transport-delay",
+          "appealId": "synthetic-appeal-199",
+          "severity": 0.05235871425173221,
+          "experienceEventId": "event-000000968"
+        },
+        "causedBy": [
+          "event-000000968",
+          "event-000000969"
+        ],
+        "simMinute": 525,
+        "districtId": "saryarka",
+        "payloadSchemaVersion": "1.0"
+      }
+    ],
+    "limitation": "Причинная трасса внутри модели, не доказательство для реального города"
+  },
+  "experiment": {
+    "pairs": [
+      {
+        "seed": 11,
+        "baseline": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99260800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 739200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98260800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 192.5885911723341,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001360",
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "difference": {
+          "cash": -5000.0,
+          "backlog": 0.0,
+          "population": 0.0,
+          "expenditure": 5000.0,
+          "travel-time-p90": 0.0,
+          "available-to-commit": -5000.0,
+          "service-unavailability-hours": -71.08887453953292
+        },
+        "baselineHash": "e59dde5740492f34b945856caf79e9add424df87918ef612ec21fa6f279d5f5c",
+        "intervention": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99255800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 744200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98255800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 121.49971663280118,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001362",
+              "event-000001365",
+              "event-000001368",
+              "event-000001371",
+              "event-000001374",
+              "event-000001377"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "budgetViolation": false,
+        "interventionHash": "5b28e17b90daba1e15053177894e747f3fe380cde6414b8c0a39178aef23de44"
+      },
+      {
+        "seed": 23,
+        "baseline": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99260800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 739200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98260800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 196.8262485866122,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001347",
+              "event-000001350",
+              "event-000001353",
+              "event-000001356",
+              "event-000001359",
+              "event-000001362"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "difference": {
+          "cash": -5000.0,
+          "backlog": 0.0,
+          "population": 0.0,
+          "expenditure": 5000.0,
+          "travel-time-p90": 0.0,
+          "available-to-commit": -5000.0,
+          "service-unavailability-hours": -68.87016704183873
+        },
+        "baselineHash": "89d5d1d7e95fcb4ef8adb4e15b09c7c2429b0e4050cc41757db2ff37c6ba9cbb",
+        "intervention": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99255800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 744200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98255800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 127.95608154477347,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001349",
+              "event-000001352",
+              "event-000001355",
+              "event-000001358",
+              "event-000001361",
+              "event-000001364"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "budgetViolation": false,
+        "interventionHash": "015ffe59ac47d0f21393225ef5c453d9e53b98d5af11ddd80fa85f0d0c89475f"
+      },
+      {
+        "seed": 37,
+        "baseline": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99260800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 739200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98260800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 193.02990293856934,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001363",
+              "event-000001366",
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "difference": {
+          "cash": -5000.0,
+          "backlog": 0.0,
+          "population": 0.0,
+          "expenditure": 5000.0,
+          "travel-time-p90": 0.0,
+          "available-to-commit": -5000.0,
+          "service-unavailability-hours": -62.82097219603233
+        },
+        "baselineHash": "e50441a1666f4093d84efd6e14f3f292cc584b60c6457183332c1755048a6d45",
+        "intervention": {
+          "cash": {
+            "id": "evidence-000002450",
+            "unit": "KZT",
+            "value": 99255800.0,
+            "metric": "cash",
+            "status": "simulated",
+            "metricId": "cash",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "backlog": {
+            "id": "evidence-000002446",
+            "unit": "job",
+            "value": 0.0,
+            "metric": "backlog",
+            "status": "simulated",
+            "metricId": "backlog",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "population": {
+            "id": "evidence-000002448",
+            "unit": "person",
+            "value": 9450.0,
+            "metric": "population",
+            "status": "simulated",
+            "metricId": "population",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "expenditure": {
+            "id": "evidence-000002449",
+            "unit": "KZT",
+            "value": 744200.0,
+            "metric": "expenditure",
+            "status": "simulated",
+            "metricId": "expenditure",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "travel-time-p90": {
+            "id": "evidence-000002447",
+            "unit": "minute",
+            "value": 42.224999999999994,
+            "metric": "travel-time-p90",
+            "status": "simulated",
+            "metricId": "travel-time-p90",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "worst-district-corridor-delay-proxy"
+          },
+          "available-to-commit": {
+            "id": "evidence-000002451",
+            "unit": "KZT",
+            "value": 98255800.0,
+            "metric": "available-to-commit",
+            "status": "simulated",
+            "metricId": "available-to-commit",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          },
+          "service-unavailability-hours": {
+            "id": "evidence-000002445",
+            "unit": "service-hour",
+            "value": 130.208930742537,
+            "metric": "service-unavailability-hours",
+            "status": "simulated",
+            "metricId": "service-unavailability-hours",
+            "simMinute": 840,
+            "sourceIds": [
+              "event-000001369",
+              "event-000001372",
+              "event-000001375",
+              "event-000001378",
+              "event-000001381",
+              "event-000001384"
+            ],
+            "districtId": null,
+            "aggregation": "state-value"
+          }
+        },
+        "budgetViolation": false,
+        "interventionHash": "70e238ac76d309f44c56d729e6e963f733340181475f8bfa4776f4462a64e87e"
+      }
+    ],
+    "status": "completed",
+    "summary": {
+      "cash": {
+        "n": 3,
+        "max": -5000.0,
+        "min": -5000.0,
+        "p05": -5000.0,
+        "p95": -5000.0,
+        "unit": "KZT",
+        "median": -5000.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "backlog": {
+        "n": 3,
+        "max": 0.0,
+        "min": 0.0,
+        "p05": 0.0,
+        "p95": 0.0,
+        "unit": "job",
+        "median": 0.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "population": {
+        "n": 3,
+        "max": 0.0,
+        "min": 0.0,
+        "p05": 0.0,
+        "p95": 0.0,
+        "unit": "person",
+        "median": 0.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "expenditure": {
+        "n": 3,
+        "max": 5000.0,
+        "min": 5000.0,
+        "p05": 5000.0,
+        "p95": 5000.0,
+        "unit": "KZT",
+        "median": 5000.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "travel-time-p90": {
+        "n": 3,
+        "max": 0.0,
+        "min": 0.0,
+        "p05": 0.0,
+        "p95": 0.0,
+        "unit": "minute",
+        "median": 0.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "available-to-commit": {
+        "n": 3,
+        "max": -5000.0,
+        "min": -5000.0,
+        "p05": -5000.0,
+        "p95": -5000.0,
+        "unit": "KZT",
+        "median": -5000.0,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      },
+      "service-unavailability-hours": {
+        "n": 3,
+        "max": -62.82097219603233,
+        "min": -71.08887453953292,
+        "p05": -70.8670037897635,
+        "p95": -63.42589168061297,
+        "unit": "service-hour",
+        "median": -68.87016704183873,
+        "intervalType": "empirical-outcome-interval-not-confidence-interval"
+      }
+    },
+    "analysis": "paired-difference-with-interval",
+    "baseline": "no-intervention",
+    "dataHash": "f2075506afc74bee8b00dffbbce70c82c82f70b294f336159b53435578e86063",
+    "protocol": {
+      "seeds": [
+        11,
+        23,
+        37
+      ],
+      "warmup": 120,
+      "horizon": 840,
+      "scenarioId": "scenario-ace4821f8f36e961d25a7091",
+      "intervention": {
+        "type": "crew.reassign",
+        "payload": {
+          "crewId": "crew-almaty-1",
+          "districtId": "nura"
+        }
+      }
+    },
+    "question": "Как решение меняет исходы внутри синтетической модели?",
+    "createdAt": "2026-09-23T12:36:28.740549+00:00",
+    "limitations": [
+      "Seed-интервал отражает случайность, не ошибку данных или модели.",
+      "Синтетические коэффициенты не калиброваны на реальном городе."
+    ],
+    "requestHash": "fdd5ba589ea9c3cf726a3527b599f50a31c8f683280713c7fc3f63c41100f9c2",
+    "experimentId": "experiment-38bb7e2542c60c28f7da27e7",
+    "modelVersion": "v2-demo/1.0",
+    "stoppingRule": "predefined-seeds-and-horizon",
+    "parameterHash": "396cd527e50a0f31f023fdb3ee0605b2a9304258b09300e31dd43107fba7c566",
+    "dataSnapshotId": "synthetic-v2-demo--f01bc52eed4f109d",
+    "primaryOutcome": "service-unavailability-hours",
+    "budgetViolationRate": 0.0
+  },
+  "assistantMode": "rule-based",
+  "assistantClaims": [
+    {
+      "text": "service-unavailability-hours: 127.36564138883553 service-hour",
+      "grade": "calculation",
+      "metricId": "service-unavailability-hours",
+      "value": 127.36564138883553,
+      "unit": "service-hour",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2444"
+      ]
+    },
+    {
+      "text": "backlog: 0.0 job",
+      "grade": "calculation",
+      "metricId": "backlog",
+      "value": 0.0,
+      "unit": "job",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2445"
+      ]
+    },
+    {
+      "text": "travel-time-p90: 42.224999999999994 minute",
+      "grade": "calculation",
+      "metricId": "travel-time-p90",
+      "value": 42.224999999999994,
+      "unit": "minute",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2446"
+      ]
+    },
+    {
+      "text": "population: 9450.0 person",
+      "grade": "calculation",
+      "metricId": "population",
+      "value": 9450.0,
+      "unit": "person",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2447"
+      ]
+    },
+    {
+      "text": "expenditure: 744200.0 KZT",
+      "grade": "calculation",
+      "metricId": "expenditure",
+      "value": 744200.0,
+      "unit": "KZT",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2448"
+      ]
+    },
+    {
+      "text": "cash: 99255800.0 KZT",
+      "grade": "calculation",
+      "metricId": "cash",
+      "value": 99255800.0,
+      "unit": "KZT",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2449"
+      ]
+    },
+    {
+      "text": "available-to-commit: 98255800.0 KZT",
+      "grade": "calculation",
+      "metricId": "available-to-commit",
+      "value": 98255800.0,
+      "unit": "KZT",
+      "window": [
+        "2026-01-01T00:00:00+00:00",
+        "2026-01-01T14:00:00+00:00"
+      ],
+      "aggregation": "model-output",
+      "evidenceIds": [
+        "run-a1400b85d0c6681d5aa883e9:metric:2450"
+      ]
+    }
+  ],
+  "exportFiles": [
+    "manifest.json",
+    "run.json",
+    "scenario.json",
+    "metrics.json"
+  ],
+  "exportBytes": 154359
+}
