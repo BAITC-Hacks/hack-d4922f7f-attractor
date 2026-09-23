@@ -1,0 +1,1675 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astana Decision Twin — V2 Preview</title>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <style>
+    /* Primitive tokens */
+    :root {
+      --ink-950: #0f1b29;
+      --ink-900: #172738;
+      --ink-800: #24394b;
+      --slate-700: #405467;
+      --slate-600: #5b6d7d;
+      --slate-500: #718291;
+      --ice-300: #bbd0df;
+      --ice-200: #d5e2eb;
+      --ice-100: #e6eef4;
+      --snow-100: #f2f6f8;
+      --snow-50: #f8fafb;
+      --white: #ffffff;
+      --teal-700: #11666b;
+      --teal-600: #137b80;
+      --teal-500: #23969a;
+      --teal-200: #a9d3d4;
+      --brass-600: #986b27;
+      --brass-500: #b98536;
+      --brass-100: #f4ead9;
+      --violet-600: #6b6299;
+      --red-600: #b54845;
+      --red-100: #f3dfdd;
+      --green-600: #3d7d62;
+      --green-100: #dfebe5;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --radius-sm: 5px;
+      --radius-md: 9px;
+      --radius-lg: 14px;
+      --shadow-soft: 0 8px 26px rgb(15 27 41 / 10%);
+      --shadow-map: 0 18px 42px rgb(15 27 41 / 15%);
+      --ease-out: cubic-bezier(.23, 1, .32, 1);
+      --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+    }
+
+    /* Semantic tokens */
+    :root {
+      --color-bg: var(--snow-100);
+      --color-surface: var(--white);
+      --color-surface-subtle: var(--snow-50);
+      --color-text: var(--ink-950);
+      --color-text-muted: var(--slate-600);
+      --color-border: var(--ice-200);
+      --color-border-strong: var(--ice-300);
+      --color-primary: var(--teal-700);
+      --color-primary-hover: var(--teal-600);
+      --color-focus: var(--teal-500);
+      --color-prediction: var(--brass-600);
+      --color-danger: var(--red-600);
+      --color-success: var(--green-600);
+      --font-ui: "Avenir Next", "DejaVu Sans", "Segoe UI", sans-serif;
+      --font-data: "Avenir Next", "DejaVu Sans", "Segoe UI", sans-serif;
+    }
+
+    /* Component tokens */
+    :root {
+      --panel-bg: rgb(255 255 255 / 96%);
+      --panel-border: var(--color-border);
+      --button-bg: var(--color-surface);
+      --button-fg: var(--color-text);
+      --button-border: var(--color-border);
+      --map-overlay: rgb(242 246 248 / 28%);
+      --chart-grid: var(--ice-200);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.45;
+      overflow: hidden;
+    }
+
+    button, select, input { font: inherit; }
+
+    button, select { touch-action: manipulation; }
+
+    button {
+      color: inherit;
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid rgb(35 150 154 / 38%);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: var(--space-3);
+      top: -80px;
+      z-index: 1000;
+      background: var(--ink-950);
+      color: var(--white);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-sm);
+    }
+
+    .skip-link:focus { top: var(--space-3); }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 68px minmax(0, 1fr);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) auto;
+      align-items: center;
+      min-width: 0;
+      padding: 0 var(--space-5);
+      background: var(--ink-950);
+      color: var(--white);
+      border-bottom: 1px solid rgb(255 255 255 / 13%);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: var(--teal-200);
+      border: 1px solid rgb(169 211 212 / 42%);
+      border-radius: 50%;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      display: block;
+      margin-top: 1px;
+      color: var(--ice-300);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .scenario-head {
+      min-width: 0;
+      padding: 0 var(--space-5);
+      border-left: 1px solid rgb(255 255 255 / 12%);
+    }
+
+    .scenario-name-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+    }
+
+    .scenario-name {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 17px;
+      font-weight: 650;
+    }
+
+    .status-pill,
+    .source-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 26px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .status-pill {
+      background: rgb(185 133 54 / 17%);
+      color: #f2cf91;
+      border: 1px solid rgb(185 133 54 / 38%);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #e4b669;
+      box-shadow: 0 0 0 3px rgb(228 182 105 / 12%);
+    }
+
+    .top-stats {
+      display: flex;
+      align-items: stretch;
+      align-self: stretch;
+    }
+
+    .top-stat {
+      min-width: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 var(--space-4);
+      border-left: 1px solid rgb(255 255 255 / 12%);
+    }
+
+    .top-stat-label { color: var(--ice-300); font-size: 11px; }
+
+    .top-stat-value {
+      margin-top: 2px;
+      font-family: var(--font-data);
+      font-size: 17px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .top-stat-value small {
+      margin-left: 5px;
+      color: #7fd0bb;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .theme-switch {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      align-self: center;
+      margin-right: 10px;
+      padding: 3px;
+      border: 1px solid rgb(169 211 212 / 30%);
+      border-radius: 7px;
+      background: rgb(255 255 255 / 7%);
+    }
+
+    .theme-button {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 5px;
+      color: var(--ice-300);
+      background: transparent;
+      font-size: 11px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .theme-button[aria-pressed="true"] { color: var(--ink-950); background: var(--white); }
+    html[data-theme="dark"] .theme-button[aria-pressed="true"] { color: #10201f; background: #85d9ce; }
+    .theme-button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 272px minmax(500px, 1fr) 344px;
+      gap: 1px;
+      background: var(--color-border);
+    }
+
+    .rail {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      background: var(--panel-bg);
+      scrollbar-width: thin;
+    }
+
+    .rail-section {
+      padding: var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .section-heading h2,
+    .section-heading h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .section-note { color: var(--color-text-muted); font-size: 11px; }
+
+    .scenario-list { display: grid; gap: var(--space-2); }
+
+    .scenario-option {
+      position: relative;
+      width: 100%;
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 8px 10px;
+      text-align: left;
+      background: var(--button-bg);
+      border: 1px solid var(--button-border);
+      border-radius: var(--radius-md);
+      transition: border-color 160ms ease, background-color 160ms ease, transform 120ms var(--ease-out);
+    }
+
+    .scenario-option:active { transform: scale(.98); }
+
+    .scenario-option[aria-pressed="true"] {
+      background: #edf7f6;
+      border-color: var(--teal-500);
+      box-shadow: inset 3px 0 0 var(--teal-600);
+    }
+
+    .scenario-glyph {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--snow-100);
+      color: var(--slate-600);
+    }
+
+    .scenario-option[aria-pressed="true"] .scenario-glyph {
+      color: var(--teal-700);
+      background: var(--teal-200);
+    }
+
+    .scenario-title { display: block; font-size: 12px; font-weight: 700; }
+    .scenario-meta { display: block; margin-top: 2px; color: var(--color-text-muted); font-size: 10px; }
+    .scenario-score { font-size: 13px; font-weight: 750; font-variant-numeric: tabular-nums; }
+
+    .control-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--color-text-muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .select {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 36px 0 11px;
+      color: var(--color-text);
+      background: var(--white);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-sm);
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 3px;
+      background: var(--snow-100);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .mode-button {
+      min-height: 36px;
+      padding: 0 7px;
+      background: transparent;
+      border: 0;
+      border-radius: 6px;
+      color: var(--color-text-muted);
+      font-size: 11px;
+      font-weight: 650;
+      transition: color 150ms ease, background-color 150ms ease, transform 120ms var(--ease-out);
+    }
+
+    .mode-button:active { transform: scale(.97); }
+    .mode-button[aria-pressed="true"] { background: var(--white); color: var(--ink-950); box-shadow: 0 1px 5px rgb(15 27 41 / 10%); }
+
+    .layer-list { display: grid; gap: 3px; }
+
+    .layer-toggle {
+      min-height: 42px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: 0 4px;
+      background: transparent;
+      border: 0;
+      text-align: left;
+    }
+
+    .layer-name { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; }
+    .layer-swatch { width: 12px; height: 12px; border-radius: 3px; background: var(--swatch); border: 1px solid rgb(15 27 41 / 10%); }
+
+    .switch {
+      width: 32px;
+      height: 18px;
+      position: relative;
+      flex: none;
+      border-radius: 999px;
+      background: var(--ice-300);
+      transition: background-color 160ms ease;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 1px 3px rgb(15 27 41 / 24%);
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .layer-toggle[aria-pressed="true"] .switch { background: var(--teal-600); }
+    .layer-toggle[aria-pressed="true"] .switch::after { transform: translateX(14px); }
+
+    .disclaimer {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--brass-100);
+      border: 1px solid #e4cfaa;
+      border-radius: var(--radius-md);
+      color: #63491f;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .map-stage {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      background: #dbe5eb;
+    }
+
+    .map-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #dbe5eb;
+    }
+
+    .snowfall {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: .85;
+      background-image: radial-gradient(circle, #fff 1.6px, transparent 2px), radial-gradient(circle, #fff 1px, transparent 1.5px);
+      background-size: 94px 112px, 137px 163px;
+      background-position: 0 0, 33px 44px;
+      animation: snow-fall 8s linear infinite;
+    }
+    .snowfall[hidden] { display: none; }
+    @keyframes snow-fall { to { background-position: 0 560px, 33px 533px; } }
+    @media (prefers-reduced-motion: reduce) { .snowfall { animation: none; } }
+
+    .map-canvas .maplibregl-canvas { outline: none; }
+    .map-canvas .maplibregl-ctrl-top-right { top: 112px; right: 14px; }
+    .map-canvas .maplibregl-ctrl-group {
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .map-canvas .maplibregl-popup-content {
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-soft);
+      font: 12px/1.45 var(--font-ui);
+    }
+
+    .map-canvas .maplibregl-popup-content strong { color: var(--ink-950); }
+    .map-canvas .maplibregl-popup-content span { color: var(--slate-600); }
+
+    .map-status {
+      position: absolute;
+      z-index: 8;
+      top: 116px;
+      left: var(--space-4);
+      max-width: 280px;
+      padding: 8px 10px;
+      border: 1px solid #e4cfaa;
+      border-left: 3px solid var(--brass-500);
+      border-radius: var(--radius-sm);
+      background: rgb(255 250 240 / 96%);
+      color: #63491f;
+      box-shadow: var(--shadow-soft);
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .map-status[hidden] { display: none; }
+
+    .map-view-controls {
+      position: absolute;
+      z-index: 8;
+      top: 114px;
+      right: 60px;
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-soft);
+    }
+    .map-view-button {
+      min-height: 36px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--color-text-muted);
+      font: 700 11px var(--font-ui);
+      cursor: pointer;
+    }
+    .map-view-button[aria-pressed="true"] { background: var(--teal-700); color: #fff; }
+
+    .map-district-controls {
+      position: absolute;
+      z-index: 8;
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: 102px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .map-district-button {
+      min-height: 36px;
+      padding: 0 11px;
+      border: 1px solid rgb(187 208 223 / 92%);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 92%);
+      color: var(--slate-700);
+      box-shadow: 0 3px 10px rgb(15 27 41 / 12%);
+      pointer-events: auto;
+      font-size: 10px;
+      font-weight: 700;
+      transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease, transform 120ms var(--ease-out);
+    }
+
+    .map-district-button:active { transform: scale(.97); }
+    .map-district-button[aria-pressed="true"] { color: var(--white); background: var(--teal-700); border-color: var(--teal-700); }
+
+    .map-basemap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      pointer-events: none;
+      filter: grayscale(.84) saturate(.58) contrast(.94) brightness(1.05);
+      opacity: .82;
+    }
+
+    .map-wash {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgb(242 246 248 / 14%), rgb(213 226 235 / 25%));
+      pointer-events: none;
+    }
+
+    .map-toolbar {
+      position: absolute;
+      left: var(--space-4);
+      top: var(--space-4);
+      right: var(--space-4);
+      z-index: 6;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-3);
+      pointer-events: none;
+    }
+
+    .map-title-card,
+    .map-legend {
+      pointer-events: auto;
+      background: rgb(255 255 255 / 93%);
+      border: 1px solid rgb(187 208 223 / 85%);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(8px);
+    }
+
+    .map-title-card {
+      max-width: 380px;
+      padding: 11px 13px;
+      border-radius: var(--radius-md);
+    }
+
+    .map-title-card h1 { margin: 0; font-size: 15px; font-weight: 750; }
+    .map-title-card p { margin: 4px 0 0; color: var(--color-text-muted); font-size: 11px; }
+
+    .source-pill {
+      margin-top: 8px;
+      color: var(--teal-700);
+      background: #e4f0ef;
+      border: 1px solid #b8d7d5;
+    }
+
+    .map-legend {
+      width: 184px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+    }
+
+    .legend-head { display: flex; justify-content: space-between; color: var(--color-text-muted); font-size: 10px; }
+    .legend-ramp { height: 8px; margin: 7px 0 5px; border-radius: 999px; background: linear-gradient(90deg, #588bc3 0 20%, #d68a5f 20% 40%, #62a581 40% 60%, #a486c6 60% 80%, #d0a64e 80%); }
+    .legend-scale { display: flex; justify-content: space-between; font-size: 9px; font-variant-numeric: tabular-nums; }
+
+    .district-overlay {
+      position: absolute;
+      inset: 72px 12px 92px 12px;
+      z-index: 4;
+      width: calc(100% - 24px);
+      height: calc(100% - 164px);
+      overflow: visible;
+    }
+
+    .context-water,
+    .context-road,
+    .context-road-major,
+    .context-boundary {
+      pointer-events: none;
+      fill: none;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .context-water { stroke: #6fa7bf; stroke-width: 13; opacity: .68; }
+    .context-road { stroke: rgb(255 255 255 / 58%); stroke-width: 2; }
+    .context-road-major { stroke: rgb(255 255 255 / 80%); stroke-width: 5; }
+    .context-boundary { stroke: rgb(64 84 103 / 20%); stroke-width: 1; stroke-dasharray: 3 6; }
+    .context-label {
+      pointer-events: none;
+      fill: rgb(64 84 103 / 70%);
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 650;
+      paint-order: stroke;
+      stroke: rgb(255 255 255 / 65%);
+      stroke-width: 3px;
+    }
+
+    .district-shape {
+      fill: var(--district-fill, rgb(19 123 128 / 28%));
+      stroke: rgb(15 27 41 / 72%);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      transition: fill 180ms ease, opacity 180ms ease, stroke-width 160ms ease;
+    }
+
+    .district-shape:hover,
+    .district-shape:focus-visible { stroke: var(--white); stroke-width: 4; }
+    .district-shape.is-selected { stroke: var(--ink-950); stroke-width: 5; filter: drop-shadow(0 4px 8px rgb(15 27 41 / 28%)); }
+
+    .district-label {
+      pointer-events: none;
+      text-anchor: middle;
+      fill: var(--ink-950);
+      paint-order: stroke;
+      stroke: rgb(255 255 255 / 86%);
+      stroke-width: 5px;
+      stroke-linejoin: round;
+      font-family: var(--font-ui);
+      font-weight: 750;
+      font-size: 18px;
+    }
+
+    .district-value { font-size: 15px; font-weight: 600; }
+
+    .map-points { transition: opacity 180ms ease; }
+    .map-points.is-hidden { opacity: 0; pointer-events: none; }
+    .poi-dot { fill: var(--white); stroke: var(--teal-700); stroke-width: 3; vector-effect: non-scaling-stroke; }
+    .measure-marker { fill: var(--brass-500); stroke: var(--white); stroke-width: 3; vector-effect: non-scaling-stroke; }
+    .reaction-marker { fill: var(--violet-600); stroke: var(--white); stroke-width: 3; vector-effect: non-scaling-stroke; }
+
+    .timeline-panel {
+      position: absolute;
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: var(--space-4);
+      z-index: 7;
+      min-height: 70px;
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr) 156px;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 10px 14px;
+      background: rgb(15 27 41 / 94%);
+      color: var(--white);
+      border: 1px solid rgb(255 255 255 / 14%);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-map);
+      backdrop-filter: blur(12px);
+    }
+
+    .timeline-title { font-size: 12px; font-weight: 700; }
+    .timeline-caption { margin-top: 3px; color: var(--ice-300); font-size: 10px; }
+    .timeline-track { min-width: 0; }
+
+    .quarter-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      color: var(--ice-300);
+      font-size: 9px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quarter-range { width: 100%; accent-color: #79c4c3; }
+    .timeline-event { padding-left: var(--space-4); border-left: 1px solid rgb(255 255 255 / 15%); }
+    .timeline-event strong { display: block; color: #efd6a8; font-size: 11px; }
+    .timeline-event span { display: block; margin-top: 3px; color: var(--ice-300); font-size: 10px; }
+
+    .right-rail { display: flex; flex-direction: column; }
+
+    .district-header {
+      padding: var(--space-5);
+      color: var(--white);
+      background: var(--ink-900);
+      border-bottom: 1px solid rgb(255 255 255 / 10%);
+    }
+
+    .district-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+    .district-header h2 { margin: 0; font-size: 21px; font-weight: 700; }
+    .district-profile { margin-top: 4px; color: var(--ice-300); font-size: 11px; }
+
+    .district-score-badge {
+      min-width: 66px;
+      padding: 7px 8px;
+      text-align: right;
+      background: rgb(255 255 255 / 8%);
+      border: 1px solid rgb(255 255 255 / 15%);
+      border-radius: var(--radius-sm);
+    }
+
+    .district-score-badge span { display: block; color: var(--ice-300); font-size: 9px; }
+    .district-score-badge strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+
+    .metric-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--white);
+    }
+
+    .metric-summary-item { padding: 13px 12px; border-right: 1px solid var(--color-border); }
+    .metric-summary-item:last-child { border-right: 0; }
+    .metric-summary-item span { display: block; color: var(--color-text-muted); font-size: 9px; }
+    .metric-summary-item strong { display: block; margin-top: 3px; font-size: 15px; font-variant-numeric: tabular-nums; }
+    .delta-positive { color: var(--color-success); }
+    .delta-neutral { color: var(--color-text-muted); }
+
+    .chart-wrap { padding: var(--space-5); border-bottom: 1px solid var(--color-border); }
+    .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+    .chart-head h3 { margin: 0; font-size: 13px; }
+    .chart-label { color: var(--color-prediction); font-size: 10px; font-weight: 700; }
+
+    .chart {
+      width: 100%;
+      height: 154px;
+      margin-top: var(--space-3);
+      overflow: visible;
+    }
+
+    .chart-grid-line { stroke: var(--chart-grid); stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .chart-axis-label { fill: var(--slate-500); font-family: var(--font-ui); font-size: 9px; }
+    .chart-line-before { fill: none; stroke: var(--slate-500); stroke-width: 2; stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; }
+    .chart-line-after { fill: none; stroke: var(--teal-700); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .chart-area { fill: url(#chartGradient); opacity: .42; }
+    .chart-point { fill: var(--white); stroke: var(--teal-700); stroke-width: 2; vector-effect: non-scaling-stroke; }
+    .chart-now { stroke: var(--brass-500); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+    .indicator-list { display: grid; gap: 13px; }
+
+    .indicator-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) 42px; align-items: center; gap: 9px; }
+    .indicator-code { color: var(--color-text-muted); font-size: 10px; font-weight: 700; }
+    .indicator-track { height: 6px; overflow: hidden; border-radius: 999px; background: var(--ice-100); }
+    .indicator-bar { height: 100%; width: var(--w); border-radius: inherit; background: var(--teal-600); transition: width 220ms var(--ease-in-out), background-color 180ms ease; }
+    .indicator-value { text-align: right; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .recommendation {
+      padding: var(--space-4);
+      background: var(--snow-50);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .recommendation-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+    .recommendation-head strong { font-size: 12px; }
+    .prediction-tag { color: var(--color-prediction); font-size: 9px; font-weight: 750; }
+    .recommendation p { margin: 8px 0 0; color: var(--color-text-muted); font-size: 11px; line-height: 1.55; }
+
+    .evidence-link {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 7px;
+      padding: 0;
+      color: var(--teal-700);
+      background: transparent;
+      border: 0;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .scenario-option:hover { border-color: var(--teal-500); }
+      .mode-button:hover { color: var(--ink-950); }
+      .layer-toggle:hover { color: var(--teal-700); }
+      .evidence-link:hover { color: var(--teal-500); }
+    }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 236px minmax(460px, 1fr) 308px; }
+      .topbar { grid-template-columns: 236px minmax(0, 1fr) auto; }
+      .top-stat { min-width: 90px; }
+      .rail-section, .chart-wrap { padding: var(--space-4); }
+    }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .app-shell { min-height: 100dvh; grid-template-rows: auto auto; }
+      .topbar { grid-template-columns: 1fr auto; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+      .scenario-head { grid-column: 1 / -1; order: 3; padding: var(--space-3) 0 0; border-left: 0; border-top: 1px solid rgb(255 255 255 / 12%); }
+      .top-stat:first-child { display: none; }
+      .workspace { display: flex; flex-direction: column; background: var(--color-bg); }
+      .left-rail, .right-rail { overflow: visible; }
+      .left-rail { order: 2; }
+      .map-stage { order: 1; min-height: 630px; }
+      .right-rail { order: 3; }
+      .scenario-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .scenario-option { grid-template-columns: 26px minmax(0, 1fr); }
+      .scenario-score { display: none; }
+      .layer-list { grid-template-columns: 1fr 1fr; }
+      .timeline-panel { grid-template-columns: 110px minmax(0, 1fr); }
+      .timeline-event { display: none; }
+    }
+
+    @media (max-width: 560px) {
+      .top-stats { display: none; }
+      .topbar { grid-template-columns: 1fr; }
+      .scenario-list { grid-template-columns: 1fr; }
+      .layer-list { grid-template-columns: 1fr; }
+      .map-stage { min-height: 590px; }
+      .map-legend { display: none; }
+      .map-title-card { max-width: calc(100vw - 48px); }
+      .map-district-controls { bottom: 126px; }
+      .timeline-panel { grid-template-columns: 1fr; gap: var(--space-2); }
+      .timeline-title-block { display: flex; justify-content: space-between; gap: var(--space-3); }
+      .metric-summary { grid-template-columns: 1fr 1fr; }
+      .metric-summary-item:last-child { grid-column: 1 / -1; border-top: 1px solid var(--color-border); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+        animation-duration: 1ms !important;
+      }
+    }
+  </style>
+  <link id="themeStylesheet" rel="stylesheet" href="themes/light.css">
+  <script>
+    (() => {
+      let saved;
+      try { saved = localStorage.getItem('astana-theme'); } catch (_) {}
+      const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+      document.getElementById('themeStylesheet').href = `themes/${theme}.css`;
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#map-main">К карте сценария</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 18h16M6 18V9l6-4 6 4v9M9 18v-5h6v5"/></svg>
+        </div>
+        <div>
+          <div class="brand-title">Astana Decision Twin</div>
+          <span class="brand-subtitle">Контур сценарного планирования</span>
+        </div>
+      </div>
+
+      <div class="scenario-head">
+        <div class="scenario-name-row">
+          <p class="scenario-name" id="headerScenarioName">Сбалансированное развитие</p>
+          <span class="status-pill" id="backendStatus"><span class="status-dot"></span>Демо · подключение к API</span>
+        </div>
+      </div>
+
+      <div class="top-stats" aria-label="Итоговые показатели сценария">
+        <div class="theme-switch" role="group" aria-label="Цветовая тема">
+          <button class="theme-button" type="button" data-theme="light" aria-label="Светлая тема" title="Светлая тема" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+          <button class="theme-button" type="button" data-theme="dark" aria-label="Тёмная тема" title="Тёмная тема" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.1A9 9 0 0 1 9.9 3.2 9 9 0 1 0 20.8 14.1Z"/></svg></button>
+        </div>
+        <div class="top-stat">
+          <span class="top-stat-label">Бюджет</span>
+          <span class="top-stat-value" id="headerBudget">95 / 100</span>
+        </div>
+        <div class="top-stat">
+          <span class="top-stat-label">Индекс города</span>
+          <span class="top-stat-value"><span id="headerScore">56.54</span><small id="headerDelta">+3.99</small></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="rail left-rail" aria-label="Настройка сценария">
+        <section class="rail-section">
+          <div class="section-heading">
+            <h2>Сценарии</h2>
+            <span class="section-note">4 варианта</span>
+          </div>
+          <div class="scenario-list" id="scenarioList">
+            <button class="scenario-option" type="button" data-scenario="baseline" aria-pressed="false">
+              <span class="scenario-glyph" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+              </span>
+              <span><span class="scenario-title">Без действий</span><span class="scenario-meta">Текущая база · 0 мер</span></span>
+              <span class="scenario-score">52.56</span>
+            </button>
+            <button class="scenario-option" type="button" data-scenario="balanced" aria-pressed="true">
+              <span class="scenario-glyph" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M7 7l-3 6h6L7 7Zm10 0-3 6h6l-3-6Z"/></svg>
+              </span>
+              <span><span class="scenario-title">Сбалансированный</span><span class="scenario-meta">5 мер · бюджет 95</span></span>
+              <span class="scenario-score">56.54</span>
+            </button>
+            <button class="scenario-option" type="button" data-scenario="mobility" aria-pressed="false">
+              <span class="scenario-glyph" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M5 17h14M7 17l1-8h8l1 8M9 12h6M8 20h.01M16 20h.01"/></svg>
+              </span>
+              <span><span class="scenario-title">Мобильный город</span><span class="scenario-meta">5 мер · бюджет 98</span></span>
+              <span class="scenario-score">55.82</span>
+            </button>
+            <button class="scenario-option" type="button" data-scenario="snowfall" aria-pressed="false">
+              <span class="scenario-glyph" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M8 4l4 4 4-4M8 20l4-4 4 4"/></svg></span>
+              <span><span class="scenario-title">Снегопад · V2</span><span class="scenario-meta">Погодный демопрогон · эксперимент</span></span>
+              <span class="scenario-score">V2</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="rail-section">
+          <div class="section-heading"><h3>Вид карты</h3></div>
+          <label class="control-label" for="metricSelect">Показатель заливки</label>
+          <select class="select" id="metricSelect">
+            <option value="D">Индекс района</option>
+            <option value="T1">T1 · Разгрузка дорог</option>
+            <option value="T2">T2 · Доступность транспорта</option>
+            <option value="E1">E1 · Озеленение</option>
+            <option value="E2">E2 · Качество воздуха</option>
+            <option value="S1">S1 · Школы и детсады</option>
+            <option value="S2">S2 · Поликлиники</option>
+            <option value="B1">B1 · Безопасность улиц</option>
+            <option value="C1">C1 · Надёжность ЖКХ</option>
+          </select>
+          <div style="height:12px"></div>
+          <div class="mode-switch" role="group" aria-label="Режим сравнения">
+            <button class="mode-button" type="button" data-mode="before" aria-pressed="false">До</button>
+            <button class="mode-button" type="button" data-mode="after" aria-pressed="true">После</button>
+            <button class="mode-button" type="button" data-mode="delta" aria-pressed="false">Дельта</button>
+          </div>
+        </section>
+
+        <section class="rail-section">
+          <div class="section-heading"><h3>Слои</h3><span class="section-note">на карте</span></div>
+          <div class="layer-list">
+            <button class="layer-toggle" type="button" data-layer="poi" aria-pressed="true">
+              <span class="layer-name"><span class="layer-swatch" style="--swatch:#ffffff"></span>Инфраструктура</span><span class="switch" aria-hidden="true"></span>
+            </button>
+            <button class="layer-toggle" type="button" data-layer="measures" aria-pressed="true">
+              <span class="layer-name"><span class="layer-swatch" style="--swatch:#b98536"></span>Меры сценария</span><span class="switch" aria-hidden="true"></span>
+            </button>
+            <button class="layer-toggle" type="button" data-layer="reactions" aria-pressed="true">
+              <span class="layer-name"><span class="layer-swatch" style="--swatch:#6b6299"></span>Реакции агентов</span><span class="switch" aria-hidden="true"></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="rail-section">
+          <div class="disclaimer">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 4.6 2.8 18a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0Z"/></svg>
+            <span>Игровая модель использует 5 районов из датасета. Геометрия и прогнозы в V2 являются демонстрационными.</span>
+          </div>
+        </section>
+      </aside>
+
+      <section class="map-stage" id="map-main" aria-label="Карта сценария Астаны">
+        <div id="mapCanvas" class="map-canvas" aria-label="Интерактивная карта районов Астаны"></div>
+        <div id="snowfallOverlay" class="snowfall" hidden aria-hidden="true"></div>
+        <div id="mapStatus" class="map-status" role="status" hidden></div>
+        <div class="map-view-controls" role="group" aria-label="Режим карты">
+          <button class="map-view-button" type="button" data-map-view="city" aria-pressed="false">Весь город</button>
+          <button class="map-view-button" type="button" data-map-view="core" aria-pressed="true">3D центр</button>
+        </div>
+
+        <div class="map-toolbar">
+          <div class="map-title-card">
+            <h1 id="mapTitle">Индекс качества жизни · после сценария</h1>
+            <p id="mapSubtitle">Q8 · прогноз по модели linear_after_lag_v1</p>
+            <span class="source-pill">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15"/></svg>
+              OpenStreetMap · 3D-здания центра · районы GeoJSON V1
+            </span>
+          </div>
+          <div class="map-legend" aria-label="Шкала значений">
+            <div class="legend-head"><span id="legendName">Цвета районов</span><span id="legendUnit">5 районов</span></div>
+            <div class="legend-ramp"></div>
+            <div class="legend-scale"><span id="legendLow">Есиль</span><span>Нура</span><span id="legendHigh">Байконур</span></div>
+          </div>
+        </div>
+
+        <div class="map-district-controls" role="group" aria-label="Выбрать район на карте">
+          <button class="map-district-button" type="button" data-map-district="saryarka" aria-pressed="false">Сарыарка</button>
+          <button class="map-district-button" type="button" data-map-district="baikonyr" aria-pressed="false">Байконур</button>
+          <button class="map-district-button" type="button" data-map-district="esil" aria-pressed="false">Есиль</button>
+          <button class="map-district-button" type="button" data-map-district="nura" aria-pressed="true">Нура</button>
+          <button class="map-district-button" type="button" data-map-district="almaty" aria-pressed="false">Алматы</button>
+        </div>
+
+        <div class="timeline-panel">
+          <div class="timeline-title-block">
+            <div>
+              <div class="timeline-title">Горизонт сценария</div>
+              <div class="timeline-caption" id="timelineCaption">Q8 · итог через 2 года</div>
+            </div>
+          </div>
+          <div class="timeline-track">
+            <div class="quarter-labels"><span>Q0</span><span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span><span>Q5</span><span>Q6</span><span>Q7</span><span>Q8</span></div>
+            <label class="sr-only" for="quarterRange">Квартал прогноза</label>
+            <input class="quarter-range" id="quarterRange" type="range" min="0" max="8" value="8" step="1">
+          </div>
+          <div class="timeline-event" aria-live="polite">
+            <strong id="eventTitle">Критические зоны сняты</strong>
+            <span id="eventCaption">S1 и S2 в Нуре ≥ 40</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="rail right-rail" aria-label="Аналитика выбранного района">
+        <div class="district-header">
+          <div class="district-header-row">
+            <div>
+              <h2 id="districtName">Нура</h2>
+              <div class="district-profile" id="districtProfile">Социальная инфраструктура · зона приоритета</div>
+            </div>
+            <div class="district-score-badge"><span>индекс</span><strong id="districtScore">52.96</strong></div>
+          </div>
+        </div>
+
+        <div class="metric-summary">
+          <div class="metric-summary-item"><span>Изменение</span><strong class="delta-positive" id="districtDelta">+3.78</strong></div>
+          <div class="metric-summary-item"><span>Критических</span><strong id="districtCritical">0</strong></div>
+          <div class="metric-summary-item"><span>Поддержка</span><strong id="districtSupport">84%</strong></div>
+        </div>
+
+        <section class="chart-wrap">
+          <div class="chart-head"><h3 id="chartTitle">Индекс района по кварталам</h3><span class="chart-label">future prediction · mock</span></div>
+          <svg class="chart" id="forecastChart" viewBox="0 0 300 154" role="img" aria-label="Прогноз изменения индекса района по кварталам">
+            <defs><linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#137b80"/><stop offset="1" stop-color="#137b80" stop-opacity="0"/></linearGradient></defs>
+            <line class="chart-grid-line" x1="28" x2="292" y1="24" y2="24"/><line class="chart-grid-line" x1="28" x2="292" y1="72" y2="72"/><line class="chart-grid-line" x1="28" x2="292" y1="120" y2="120"/>
+            <text class="chart-axis-label" x="2" y="27">60</text><text class="chart-axis-label" x="2" y="75">50</text><text class="chart-axis-label" x="2" y="123">40</text>
+            <path class="chart-line-before" id="chartBaseline" d="M28 84.2H292"/>
+            <path class="chart-area" id="chartArea" d="M28 84.2 L61 84.2 L94 82.5 L127 80.7 L160 79 L193 77.3 L226 75.5 L259 73.8 L292 72.1 L292 124 L28 124 Z"/>
+            <path class="chart-line-after" id="chartLine" d="M28 84.2 L61 84.2 L94 82.5 L127 80.7 L160 79 L193 77.3 L226 75.5 L259 73.8 L292 72.1"/>
+            <line class="chart-now" id="chartNow" x1="292" x2="292" y1="18" y2="124"/>
+            <g id="chartPoints"></g>
+            <text class="chart-axis-label" x="28" y="145">Q0</text><text class="chart-axis-label" x="148" y="145">Q4</text><text class="chart-axis-label" x="278" y="145">Q8</text>
+          </svg>
+        </section>
+
+        <section class="rail-section">
+          <div class="section-heading"><h3>Показатели района</h3><span class="section-note" id="indicatorQuarter">Q8</span></div>
+          <div class="indicator-list" id="indicatorList"></div>
+        </section>
+
+        <section class="rail-section">
+          <div class="recommendation">
+            <div class="recommendation-head"><strong>Вывод AI-совета</strong><span class="prediction-tag">СИНТЕТИЧЕСКАЯ ОЦЕНКА</span></div>
+            <p id="recommendationText">Социальные меры снимают два критических провала Нуры. Главный нерешённый вопрос — доступность общественного транспорта.</p>
+            <button class="evidence-link" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12h6M9 16h6M9 8h3M6 3h9l3 3v15H6V3Z"/></svg>
+              Показать основания
+            </button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="vendor/maplibre-gl.js"></script>
+  <script>
+    const districtNames = {
+      esil: 'Есиль', almaty: 'Алматы', saryarka: 'Сарыарка', baikonyr: 'Байконур', nura: 'Нура'
+    };
+    const districtPalette = { esil:'#588bc3', almaty:'#d68a5f', saryarka:'#62a581', nura:'#a486c6', baikonyr:'#d0a64e' };
+
+    const profiles = {
+      esil: 'Деловой центр · нагрузка на мосты',
+      almaty: 'Сложившийся район · риск ЖКХ',
+      saryarka: 'Частный сектор · качество воздуха',
+      baikonyr: 'Стабильный профиль · без перекосов',
+      nura: 'Социальная инфраструктура · зона приоритета'
+    };
+
+    const base = {
+      esil:     { D:62.99, T1:45, T2:62, E1:68, E2:72, S1:48, S2:55, B1:78, C1:75 },
+      almaty:   { D:57.06, T1:40, T2:75, E1:50, E2:55, S1:60, S2:65, B1:62, C1:50 },
+      saryarka: { D:54.65, T1:50, T2:70, E1:42, E2:40, S1:62, S2:68, B1:58, C1:45 },
+      baikonyr: { D:56.63, T1:52, T2:68, E1:55, E2:50, S1:58, S2:60, B1:52, C1:55 },
+      nura:     { D:49.18, T1:55, T2:40, E1:45, E2:65, S1:38, S2:35, B1:55, C1:60 }
+    };
+
+    const scenarios = {
+      baseline: {
+        name: 'Без действий', score: 52.56, budget: '0 / 100', delta: 0,
+        support: { esil:57, almaty:52, saryarka:48, baikonyr:54, nura:37 },
+        add: {}
+      },
+      balanced: {
+        name: 'Сбалансированное развитие', score: 56.54, budget: '95 / 100', delta: 3.99,
+        support: { esil:49, almaty:58, saryarka:71, baikonyr:56, nura:84 },
+        add: {
+          esil:{D:.44,C1:0}, almaty:{D:.44}, saryarka:{D:1.65,E2:8.75,C1:2.5}, baikonyr:{D:.44},
+          nura:{D:3.78,S1:10,S2:8.75,B1:12.5,T2:0}
+        }
+      },
+      mobility: {
+        name: 'Мобильный город', score: 55.82, budget: '98 / 100', delta: 3.26,
+        support: { esil:73, almaty:66, saryarka:55, baikonyr:61, nura:70 },
+        add: {
+          esil:{D:1.35,T1:6,T2:5}, almaty:{D:.72,T1:4}, saryarka:{D:.72,T1:4}, baikonyr:{D:.72,T1:4},
+          nura:{D:3.12,T1:8,T2:10,E2:2,S1:2.6}
+        }
+      },
+      snowfall: {
+        name:'Снегопад · V2', score:52.56, budget:'демо V2', delta:0,
+        support:{ esil:57, almaty:52, saryarka:48, baikonyr:54, nura:37 }, add:{}
+      }
+    };
+
+    const metricNames = {
+      D:'Индекс района', T1:'Разгрузка дорог', T2:'Доступность транспорта', E1:'Озеленение',
+      E2:'Качество воздуха', S1:'Школы и детсады', S2:'Поликлиники', B1:'Безопасность улиц', C1:'Надёжность ЖКХ'
+    };
+
+    const state = { scenario:'balanced', district:'nura', metric:'D', mode:'after', quarter:8, layers:{poi:true, measures:true, reactions:true} };
+    const DISTRICT_URL = location.pathname.includes('/design-v2/') ? '/mock-api/astana-districts.geojson' : '../../apps/web/public/mock-api/astana-districts.geojson';
+    const API_BASE = ['127.0.0.1','localhost'].includes(location.hostname) ? 'http://127.0.0.1:8000' : '/api-proxy';
+    const OSM_CORE_URL = 'data/astana-core.geojson';
+    const localStyle = {
+      version:8,
+      sources:{
+        'osm-tiles':{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256, attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' },
+        'openmaptiles':{ type:'vector', url:'https://tiles.openfreemap.org/planet', attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · OpenFreeMap' }
+      },
+      layers:[
+        { id:'local-background', type:'background', paint:{ 'background-color':'#e7edf0' } },
+        { id:'city-basemap', type:'raster', source:'osm-tiles', paint:{ 'raster-opacity':.9 } }
+      ]
+    };
+    const layerIds = { poi:'infrastructure-points', measures:'measure-points', reactions:'reaction-points' };
+    let map;
+    let districtGeoJson;
+    let osmCoreGeoJson;
+    let mapPopup;
+    let fittedMap = false;
+    let mapEventsBound = false;
+
+    function normalizeDistrictId(id) {
+      return String(id).toLowerCase() === 'baykonur' ? 'baikonyr' : String(id).toLowerCase();
+    }
+
+    function featureCenter(feature) {
+      const points = feature.geometry.type === 'Polygon'
+        ? feature.geometry.coordinates.flat(1)
+        : feature.geometry.coordinates.flat(2);
+      const lng = points.reduce((sum, point) => sum + point[0], 0) / points.length;
+      const lat = points.reduce((sum, point) => sum + point[1], 0) / points.length;
+      return [lng, lat];
+    }
+
+    function markerCollection(kind) {
+      const offsets = { poi:[-.006,.004], measures:[.006,.002], reactions:[0,-.006] };
+      return {
+        type:'FeatureCollection',
+        features:districtGeoJson.features.map(feature => {
+          const id = feature.properties.model_id;
+          const center = featureCenter(feature);
+          return {
+            type:'Feature',
+            properties:{
+              id,
+              kind,
+              mock:true,
+              label: kind === 'poi' ? `Инфраструктура — ${districtNames[id]}` : kind === 'measures' ? `Мера сценария — ${districtNames[id]}` : `Поддержка агентов ${scenarios[state.scenario].support[id]}%`
+            },
+            geometry:{ type:'Point', coordinates:[center[0] + offsets[kind][0], center[1] + offsets[kind][1]] }
+          };
+        })
+      };
+    }
+
+    function mapData() {
+      return {
+        ...districtGeoJson,
+        features:districtGeoJson.features.map(feature => {
+          const id = feature.properties.model_id;
+          const value = shownValue(id, state.metric);
+          return { ...feature, properties:{ ...feature.properties, value, value_label:format(value, state.mode === 'delta'), map_color:districtPalette[id] } };
+        })
+      };
+    }
+
+    function addMapLayers() {
+      if (!map || !districtGeoJson || !map.isStyleLoaded()) return;
+      if (!map.getSource('districts')) {
+        map.addSource('districts', { type:'geojson', data:mapData(), promoteId:'model_id' });
+        map.addLayer({
+          id:'district-fill', type:'fill', source:'districts',
+          paint:{
+            'fill-color':['get','map_color'],
+            'fill-opacity':['interpolate',['linear'],['zoom'],10,['case',['boolean',['feature-state','selected'],false],.7,.52],13,.42,15,.28]
+          }
+        });
+        map.addLayer({
+          id:'district-outline', type:'line', source:'districts',
+          paint:{ 'line-color':['case',['boolean',['feature-state','selected'],false],'#083f45','#ffffff'], 'line-width':['case',['boolean',['feature-state','selected'],false],3,1.4], 'line-opacity':.95 }
+        });
+        map.addLayer({
+          id:'district-label', type:'symbol', source:'districts', minzoom:8.5,
+          layout:{ 'text-field':['format',['get','name_object'],{},'\n',{},['get','value_label'],{'font-scale':.82}], 'text-size':12, 'text-allow-overlap':false },
+          paint:{ 'text-color':'#102f36', 'text-halo-color':'rgba(255,255,255,.94)', 'text-halo-width':1.5 }
+        });
+      }
+
+      if (osmCoreGeoJson && !map.getSource('osm-core')) {
+        map.addSource('osm-core', { type:'geojson', data:osmCoreGeoJson });
+        map.addLayer({
+          id:'osm-road-casing', type:'line', source:'osm-core', filter:['==',['get','kind'],'road'], minzoom:10,
+          paint:{ 'line-color':'#a9bac1', 'line-width':['interpolate',['linear'],['zoom'],10,.6,14,6,17,16], 'line-opacity':.8 }
+        });
+        map.addLayer({
+          id:'osm-roads', type:'line', source:'osm-core', filter:['==',['get','kind'],'road'], minzoom:10,
+          paint:{ 'line-color':'#ffffff', 'line-width':['interpolate',['linear'],['zoom'],10,.35,14,4,17,12], 'line-opacity':.95 }
+        });
+        map.addLayer({
+          id:'osm-buildings-3d', type:'fill-extrusion', source:'osm-core', filter:['==',['get','kind'],'building'], minzoom:12,
+          paint:{
+            'fill-extrusion-color':['case',['==',['get','height_source'],'visual-fallback:12m'],'#9eb4bd','#478b9c'],
+            'fill-extrusion-height':['min',['get','height_m'],140],
+            'fill-extrusion-base':0,
+            'fill-extrusion-opacity':.86
+          }
+        });
+      }
+      if (!map.getLayer('citywide-buildings-3d')) {
+        map.addLayer({
+          id:'citywide-buildings-3d', type:'fill-extrusion', source:'openmaptiles', 'source-layer':'building', minzoom:12,
+          filter:['!=',['get','hide_3d'],true],
+          paint:{
+            'fill-extrusion-color':'#6c99a6',
+            'fill-extrusion-height':['min',['coalesce',['get','render_height'],8],140],
+            'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
+            'fill-extrusion-opacity':.72
+          }
+        });
+        map.moveLayer('district-outline');
+        map.moveLayer('district-label');
+      }
+
+      const markerLayers = [
+        ['poi','infrastructure-source','infrastructure-points','#ffffff','#137b80'],
+        ['measures','measures-source','measure-points','#b98536','#ffffff'],
+        ['reactions','reactions-source','reaction-points','#6b6299','#ffffff']
+      ];
+      markerLayers.forEach(([key, sourceId, layerId, color, stroke]) => {
+        if (!map.getSource(sourceId)) map.addSource(sourceId, { type:'geojson', data:markerCollection(key) });
+        if (!map.getLayer(layerId)) map.addLayer({
+          id:layerId, type:'circle', source:sourceId,
+          layout:{ visibility:state.layers[key] ? 'visible' : 'none' },
+          paint:{ 'circle-radius':key === 'reactions' ? 7 : 6, 'circle-color':color, 'circle-stroke-color':stroke, 'circle-stroke-width':2, 'circle-opacity':.95 }
+        });
+      });
+
+      if (!mapEventsBound) {
+        mapEventsBound = true;
+        let hovered;
+        map.on('mousemove','district-fill', event => {
+          if (hovered) map.setFeatureState({ source:'districts', id:hovered }, { hover:false });
+          hovered = event.features[0].properties.model_id;
+          map.setFeatureState({ source:'districts', id:hovered }, { hover:true });
+          map.getCanvas().style.cursor = 'pointer';
+          const feature = event.features[0];
+          mapPopup.setLngLat(event.lngLat).setHTML(`<strong>${feature.properties.name_object}</strong><br><span>${metricNames[state.metric]}: ${feature.properties.value_label}</span>`).addTo(map);
+        });
+        map.on('mouseleave','district-fill', () => {
+          if (hovered) map.setFeatureState({ source:'districts', id:hovered }, { hover:false });
+          hovered = undefined;
+          map.getCanvas().style.cursor = '';
+          mapPopup.remove();
+        });
+        map.on('click','district-fill', event => selectDistrict(event.features[0].properties.model_id));
+        markerLayers.forEach(([, , layerId]) => {
+          map.on('mouseenter',layerId,event => {
+            map.getCanvas().style.cursor = 'pointer';
+            mapPopup.setLngLat(event.features[0].geometry.coordinates).setHTML(`<strong>${event.features[0].properties.label}</strong><br><span>mock-слой</span>`).addTo(map);
+          });
+          map.on('mouseleave',layerId,() => { map.getCanvas().style.cursor = ''; mapPopup.remove(); });
+        });
+      }
+
+      fittedMap = true;
+      renderMap();
+      renderLayers();
+    }
+
+    async function initMap() {
+      const status = document.getElementById('mapStatus');
+      try {
+        const [districtResponse, osmResponse] = await Promise.all([fetch(DISTRICT_URL), fetch(OSM_CORE_URL)]);
+        if (!districtResponse.ok) throw new Error(`Районы GeoJSON ${districtResponse.status}`);
+        if (!osmResponse.ok) throw new Error(`Здания OSM GeoJSON ${osmResponse.status}`);
+        const data = await districtResponse.json();
+        osmCoreGeoJson = await osmResponse.json();
+        districtGeoJson = { ...data, features:data.features.filter(feature => feature.properties.in_v1_model !== false).map(feature => ({ ...feature, properties:{ ...feature.properties, model_id:normalizeDistrictId(feature.properties.id) } })) };
+        map = new maplibregl.Map({ container:'mapCanvas', style:localStyle, center:[71.43,51.13], zoom:15.35, pitch:57, bearing:-18, antialias:true, attributionControl:false });
+        mapPopup = new maplibregl.Popup({ closeButton:false, closeOnClick:false, offset:10 });
+        map.addControl(new maplibregl.NavigationControl({ showCompass:true }), 'top-right');
+        map.addControl(new maplibregl.AttributionControl({ compact:true }), 'bottom-right');
+        map.on('load', () => { addMapLayers(); setTheme(document.documentElement.dataset.theme || 'light', false); });
+      } catch (error) {
+        status.hidden = false;
+        status.textContent = `Не удалось загрузить районы: ${error.message}`;
+      }
+    }
+
+    function setMapView(view) {
+      if (!map) return;
+      document.querySelectorAll('[data-map-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mapView === view)));
+      if (view === 'core') {
+        map.easeTo({ center:[71.43,51.13], zoom:15.35, pitch:57, bearing:-18, duration:650 });
+      } else {
+        const bounds = new maplibregl.LngLatBounds();
+        districtGeoJson.features.forEach(feature => {
+          const coordinates = feature.geometry.type === 'Polygon' ? feature.geometry.coordinates.flat(1) : feature.geometry.coordinates.flat(2);
+          coordinates.forEach(point => bounds.extend(point));
+        });
+        map.fitBounds(bounds, { padding:{ top:145, right:60, bottom:155, left:60 }, maxZoom:10.7, pitch:0, bearing:0, duration:650 });
+      }
+    }
+    document.querySelectorAll('[data-map-view]').forEach(button => button.addEventListener('click', () => setMapView(button.dataset.mapView)));
+
+    function targetValue(district, metric) {
+      const addition = scenarios[state.scenario].add[district]?.[metric] ?? 0;
+      return base[district][metric] + addition;
+    }
+
+    function maturity() {
+      if (state.scenario === 'baseline') return 0;
+      return Math.max(0, (state.quarter - 1) / 7);
+    }
+
+    function shownValue(district, metric) {
+      const before = base[district][metric];
+      const after = before + (targetValue(district, metric) - before) * maturity();
+      if (state.mode === 'before') return before;
+      if (state.mode === 'delta') return after - before;
+      return after;
+    }
+
+    function format(value, sign = false) {
+      const prefix = sign && value > .005 ? '+' : '';
+      return prefix + value.toFixed(value < 10 && value > -10 ? 2 : 1);
+    }
+
+    function renderMap() {
+      document.querySelectorAll('[data-map-district]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mapDistrict === state.district)));
+      if (map && districtGeoJson && map.getSource('districts')) {
+        map.getSource('districts').setData(mapData());
+        districtGeoJson.features.forEach(feature => map.setFeatureState({ source:'districts', id:feature.properties.model_id }, { selected:feature.properties.model_id === state.district }));
+        const reactions = map.getSource('reactions-source');
+        if (reactions) reactions.setData(markerCollection('reactions'));
+      }
+
+      const modeText = state.mode === 'before' ? 'до сценария' : state.mode === 'delta' ? 'изменение к базе' : 'после сценария';
+      document.getElementById('mapTitle').textContent = `${metricNames[state.metric]} · ${modeText}`;
+      document.getElementById('mapSubtitle').textContent = `Q${state.quarter} · прогноз по модели linear_after_lag_v1`;
+      document.getElementById('legendName').textContent = 'Цвета районов';
+      document.getElementById('legendUnit').textContent = '5 районов';
+      document.getElementById('legendLow').textContent = 'Есиль';
+      document.getElementById('legendHigh').textContent = 'Байконур';
+    }
+
+    function renderHeader() {
+      const scenario = scenarios[state.scenario];
+      document.getElementById('headerScenarioName').textContent = scenario.name;
+      document.getElementById('headerBudget').textContent = scenario.budget;
+      const liveScore = 52.55768 + scenario.delta * maturity();
+      document.getElementById('headerScore').textContent = liveScore.toFixed(2);
+      document.getElementById('headerDelta').textContent = scenario.delta ? `+${(scenario.delta * maturity()).toFixed(2)}` : 'база';
+    }
+
+    function criticalCount(district) {
+      return ['T1','T2','E1','E2','S1','S2','B1','C1'].filter(metric => shownValue(district, metric) < 40).length;
+    }
+
+    function renderDistrict() {
+      const id = state.district;
+      const districtScore = shownValue(id, 'D');
+      const delta = districtScore - base[id].D;
+      document.getElementById('districtName').textContent = districtNames[id];
+      document.getElementById('districtProfile').textContent = profiles[id];
+      document.getElementById('districtScore').textContent = districtScore.toFixed(2);
+      document.getElementById('districtDelta').textContent = format(delta, true);
+      document.getElementById('districtDelta').className = delta > 0 ? 'delta-positive' : 'delta-neutral';
+      document.getElementById('districtCritical').textContent = criticalCount(id);
+      document.getElementById('districtSupport').textContent = `${scenarios[state.scenario].support[id]}%`;
+      document.getElementById('indicatorQuarter').textContent = `Q${state.quarter}`;
+
+      const indicators = ['T1','T2','E1','E2','S1','S2','B1','C1'];
+      document.getElementById('indicatorList').innerHTML = indicators.map(metric => {
+        const value = shownValue(id, metric);
+        const color = value < 40 ? 'var(--red-600)' : value < 50 ? 'var(--brass-500)' : 'var(--teal-600)';
+        return `<div class="indicator-row">
+          <span class="indicator-code">${metric}</span>
+          <div class="indicator-track" title="${metricNames[metric]}: ${value.toFixed(1)}"><div class="indicator-bar" style="--w:${Math.max(0, Math.min(100, value))}%;background:${color}"></div></div>
+          <span class="indicator-value">${value.toFixed(1)}</span>
+        </div>`;
+      }).join('');
+
+      const messages = {
+        nura:'Социальные меры снимают два критических провала Нуры. Главный нерешённый вопрос — доступность общественного транспорта.',
+        saryarka:'Экологический эффект заметен к концу горизонта. Риск — низкая надёжность коммунальной инфраструктуры.',
+        esil:'Городские меры дают умеренный эффект. Район ожидает отдельного решения по пробкам на мостах.',
+        almaty:'Сценарий улучшает общегородские сервисы, но системный риск износа ЖКХ остаётся.',
+        baikonyr:'Профиль района стабилен. Прямых инвестиций мало, поэтому поддержка зависит от прозрачности распределения бюджета.'
+      };
+      document.getElementById('recommendationText').textContent = messages[id];
+    }
+
+    function chartSeries() {
+      const start = base[state.district][state.metric];
+      const end = targetValue(state.district, state.metric);
+      return Array.from({length:9}, (_, q) => q < 2 ? start : start + (end - start) * ((q - 1) / 7));
+    }
+
+    function chartY(value) {
+      if (state.mode === 'delta') return 120 - Math.max(-2, Math.min(12, value)) / 14 * 96;
+      return 120 - (Math.max(38, Math.min(68, value)) - 38) / 30 * 96;
+    }
+
+    function renderChart() {
+      const series = chartSeries();
+      const rendered = series.map((v, q) => state.mode === 'delta' ? v - series[0] : state.mode === 'before' ? series[0] : v);
+      const points = rendered.map((value, index) => [28 + index * 33, chartY(value)]);
+      const line = points.map((p, i) => `${i ? 'L' : 'M'}${p[0]} ${p[1]}`).join(' ');
+      const area = `${line} L292 124 L28 124 Z`;
+      document.getElementById('chartLine').setAttribute('d', line);
+      document.getElementById('chartArea').setAttribute('d', area);
+      const baselineY = chartY(state.mode === 'delta' ? 0 : series[0]);
+      document.getElementById('chartBaseline').setAttribute('d', `M28 ${baselineY}H292`);
+      document.getElementById('chartNow').setAttribute('x1', 28 + state.quarter * 33);
+      document.getElementById('chartNow').setAttribute('x2', 28 + state.quarter * 33);
+      document.getElementById('chartPoints').innerHTML = points.map((p, i) => `<circle class="chart-point" cx="${p[0]}" cy="${p[1]}" r="${i === state.quarter ? 4 : 2.5}"/>`).join('');
+      document.getElementById('chartTitle').textContent = `${metricNames[state.metric]} по кварталам`;
+      document.getElementById('forecastChart').setAttribute('aria-label', `Прогноз показателя ${metricNames[state.metric]} для района ${districtNames[state.district]} по кварталам`);
+    }
+
+    function renderTimeline() {
+      const q = state.quarter;
+      if (state.scenario === 'snowfall') {
+        document.getElementById('timelineCaption').textContent = `V2 · снегопад · ${q} ч моделирования`;
+        document.getElementById('eventTitle').textContent = 'Снегопад влияет на движение';
+        document.getElementById('eventCaption').textContent = state.snowfallCaption || 'Синтетический прогон V2';
+        return;
+      }
+      document.getElementById('timelineCaption').textContent = q === 0 ? 'Q0 · исходное состояние' : `Q${q} · ${q * 3} месяцев от старта`;
+      const events = q < 1 ? ['Сценарий не запущен','Показана исходная база']
+        : q < 3 ? ['Старт быстрых мер','Сервисы и безопасность']
+        : q < 5 ? ['Включён средний лаг','Социальная инфраструктура']
+        : ['Критические зоны сняты','S1 и S2 в Нуре ≥ 40'];
+      document.getElementById('eventTitle').textContent = events[0];
+      document.getElementById('eventCaption').textContent = events[1];
+    }
+
+    function renderLayers() {
+      Object.entries(state.layers).forEach(([key, visible]) => {
+        document.querySelector(`[data-layer="${key}"]`)?.setAttribute('aria-pressed', String(visible));
+        if (map && map.getLayer(layerIds[key])) map.setLayoutProperty(layerIds[key], 'visibility', visible ? 'visible' : 'none');
+      });
+    }
+
+    function renderAll() {
+      renderHeader();
+      renderMap();
+      renderDistrict();
+      renderChart();
+      renderTimeline();
+      renderLayers();
+    }
+
+    document.querySelectorAll('[data-scenario]').forEach(button => {
+      button.addEventListener('click', () => {
+        state.scenario = button.dataset.scenario;
+        document.getElementById('snowfallOverlay').hidden = state.scenario !== 'snowfall';
+        document.querySelectorAll('[data-scenario]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+        renderAll();
+        if (state.scenario === 'snowfall') void runSnowfall();
+      });
+    });
+
+    async function connectBackend() {
+      try {
+        const response = await fetch(`${API_BASE}/catalog`);
+        if (!response.ok) throw new Error(`API ${response.status}`);
+        const catalog = await response.json();
+        for (const district of catalog.districts || []) {
+          const id = normalizeDistrictId(district.id);
+          if (base[id]) Object.assign(base[id], district.indicators || {});
+        }
+        document.getElementById('backendStatus').innerHTML = '<span class="status-dot"></span>V1 API подключён · V2 эксперимент';
+        renderAll();
+      } catch (_) {
+        document.getElementById('backendStatus').innerHTML = '<span class="status-dot"></span>Демо без API · расчёт недоступен';
+      }
+    }
+
+    async function runSnowfall() {
+      try {
+        const post = (path, payload) => fetch(`${API_BASE}${path}`, { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify(payload) }).then(async response => {
+          if (!response.ok) throw new Error(`API ${response.status}`);
+          return response.json();
+        });
+        const scenario = await post('/scenarios', { weatherScenarioId:'snowfall-demo' });
+        const run = await post('/runs', { scenarioId:scenario.id, seed:1, horizon:6 });
+        const metricsResponse = await fetch(`${API_BASE}/runs/${run.runId}/metrics`);
+        if (!metricsResponse.ok) throw new Error(`Метрики ${metricsResponse.status}`);
+        const metrics = await metricsResponse.json();
+        const minutes = metrics.series.travelTimeMinutes.at(-1)?.value;
+        state.snowfallCaption = `Прогон ${run.runId.slice(0,8)} · время в пути ${minutes?.toFixed(1) ?? '—'} мин · synthetic`;
+        if (state.scenario === 'snowfall') renderTimeline();
+      } catch (error) {
+        state.snowfallCaption = `V2 API недоступен: ${error.message}`;
+        if (state.scenario === 'snowfall') renderTimeline();
+      }
+    }
+
+    document.getElementById('metricSelect').addEventListener('change', event => {
+      state.metric = event.target.value;
+      renderAll();
+    });
+
+    document.querySelectorAll('[data-mode]').forEach(button => {
+      button.addEventListener('click', () => {
+        state.mode = button.dataset.mode;
+        document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+        renderAll();
+      });
+    });
+
+    document.querySelectorAll('[data-layer]').forEach(button => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.layer;
+        state.layers[key] = !state.layers[key];
+        button.setAttribute('aria-pressed', String(state.layers[key]));
+        renderLayers();
+      });
+    });
+
+    function selectDistrict(id) {
+      state.district = id;
+      renderAll();
+    }
+
+    document.querySelectorAll('[data-map-district]').forEach(button => button.addEventListener('click', () => selectDistrict(button.dataset.mapDistrict)));
+
+    document.getElementById('quarterRange').addEventListener('input', event => {
+      state.quarter = Number(event.target.value);
+      renderAll();
+    });
+
+    function setTheme(theme, persist = true) {
+      document.documentElement.dataset.theme = theme;
+      document.getElementById('themeStylesheet').href = `themes/${theme}.css`;
+      document.querySelectorAll('[data-theme]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.theme === theme)));
+      if (map && map.getLayer('local-background')) {
+        map.setPaintProperty('local-background', 'background-color', theme === 'dark' ? '#162932' : '#e7edf0');
+        map.setPaintProperty('city-basemap', 'raster-brightness-max', theme === 'dark' ? .52 : 1);
+        map.setPaintProperty('city-basemap', 'raster-saturation', theme === 'dark' ? -.6 : 0);
+        if (map.getLayer('osm-road-casing')) map.setPaintProperty('osm-road-casing', 'line-color', theme === 'dark' ? '#42616d' : '#a9bac1');
+        if (map.getLayer('osm-roads')) map.setPaintProperty('osm-roads', 'line-color', theme === 'dark' ? '#29424c' : '#ffffff');
+      }
+      if (persist) {
+        try { localStorage.setItem('astana-theme', theme); } catch (_) {}
+      }
+    }
+
+    document.querySelectorAll('[data-theme]').forEach(button => button.addEventListener('click', () => setTheme(button.dataset.theme)));
+    setTheme(document.documentElement.dataset.theme || 'light', false);
+
+    renderAll();
+    initMap();
+    void connectBackend();
+  </script>
+</body>
+</html>

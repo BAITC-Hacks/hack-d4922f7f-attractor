@@ -1,0 +1,77 @@
+.design-switch{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid #ffffff35;border-radius:8px;background:#ffffff12;white-space:nowrap}
+.design-switch button{border:0;border-radius:5px;background:transparent;color:#c5d5de;padding:7px 10px;font-size:11px;cursor:pointer}
+.design-switch button[aria-pressed="true"]{background:#e7f1f1;color:#115f63;font-weight:700}
+.design-switch button:focus-visible,.design-v2 button:focus-visible,.design-v2 select:focus-visible{outline:3px solid #53b8b9;outline-offset:2px}
+.design-v2{
+  --navy:#0f1b29;--ink:#172738;--muted:#5b6d7d;--border:#d5e2eb;--paper:#fff;--blue:#11666b;--blue-soft:#e3f1f0;--amber:#986b27;--green:#3d7d62;
+  max-width:none;min-height:100vh;padding:0 20px;background:#f2f6f8;color:#0f1b29;
+  font-family:"Avenir Next","Segoe UI",sans-serif;font-size:14px
+}
+.design-v2 .topbar{height:68px;margin:0 -20px;padding:0 20px;gap:20px;background:#0f1b29}
+.design-v2 .brand{min-width:255px;font-size:14px;letter-spacing:0;text-transform:none}
+.design-v2 .brand-mark{border-radius:50%;color:#a9d3d4;border-color:#a9d3d47a}
+.design-v2 .brand small{font-size:11px;color:#bbd0df}
+.design-v2 .main-nav{gap:4px}
+.design-v2 .main-nav a{padding:0 13px;font:600 12px "Avenir Next","Segoe UI",sans-serif;letter-spacing:0}
+.design-v2 .main-nav a.active:after{background:#23969a}
+.design-v2 .topbar-meta{font:600 11px "Avenir Next","Segoe UI",sans-serif;color:#c7dadd}
+.design-v2 .page-heading{height:100px;padding:8px 0}
+.design-v2 .breadcrumb,.design-v2 .inspector-kicker,.design-v2 .section-label{font:600 11px "Avenir Next","Segoe UI",sans-serif;letter-spacing:0;color:#718291}
+.design-v2 .page-heading h1{font-size:25px;letter-spacing:-.035em;font-weight:650;margin:4px 0}
+.design-v2 .page-heading p{font-size:12px}
+.design-v2 .page-status{font:600 11px "Avenir Next","Segoe UI",sans-serif}
+.design-v2 .page-status small{font-size:10px}
+.design-v2 .mode-switch{border-radius:7px;background:#e6eef4}
+.design-v2 .mode-switch button{font-size:12px;border-radius:5px}
+.design-v2 .mode-switch button.active{background:#fff;color:#11666b;box-shadow:0 1px 4px #0f1b291a}
+.design-v2 .scenario-picker{border-radius:9px;margin-bottom:12px;padding:12px 16px;grid-template-columns:110px minmax(220px,1fr) auto;box-shadow:0 2px 12px #0f1b2907}
+.design-v2 .scenario-picker label,.design-v2 .scenario-picker span{font-size:11px}
+.design-v2 .scenario-picker select{border-radius:6px;font-size:11px}
+.design-v2 .map-workspace{height:min(760px,calc(100vh - 250px));min-height:570px;grid-template-columns:260px minmax(400px,1fr) 345px;border-radius:11px;overflow:hidden;box-shadow:0 8px 26px #0f1b2910}
+.design-v2 .layer-sidebar{padding:20px 18px;background:#fff}
+.design-v2 .side-heading,.design-v2 .layer-group-title{font:600 11px "Avenir Next","Segoe UI",sans-serif;letter-spacing:0}
+.design-v2 .layer-sidebar h2{font-size:18px;font-weight:650;margin:13px 0 4px}
+.design-v2 .side-description{font-size:11px;margin-bottom:23px}
+.design-v2 .layer-group{padding-top:15px;margin-bottom:20px}
+.design-v2 .layer-toggle{padding:12px 0}
+.design-v2 .layer-copy strong,.design-v2 .scenario-layer strong{font-size:12px}
+.design-v2 .layer-copy small,.design-v2 .scenario-layer small,.design-v2 .sidebar-foot p{font-size:10px}
+.design-v2 .layer-icon{width:30px;height:30px;border-radius:7px;color:#137b80;background:#e3f1f0}
+.design-v2 .layer-switch.on{background:#137b80}
+.design-v2 .map-view{background:#e7edf0}
+.design-v2 .map-title{top:20px;left:20px;padding:12px 15px;border-radius:9px;box-shadow:0 8px 26px #0f1b291a}
+.design-v2 .map-title strong{font-size:16px}
+.design-v2 .map-title small{font:600 10px "Avenir Next","Segoe UI",sans-serif;color:#718291}
+.design-v2 .map-layer-key{border-radius:7px;font-size:10px;padding:9px 11px}
+.design-v2 .map-notice,.design-v2 .map-loading{border-radius:7px}
+.design-v2 .map-notice strong{font-size:11px}
+.design-v2 .map-notice span{font-size:10px}
+.design-v2 .inspector{background:#fff}
+.design-v2 .inspector-tabs{height:48px;padding:0 20px;gap:24px}
+.design-v2 .inspector-tabs button{font:650 11px "Avenir Next","Segoe UI",sans-serif}
+.design-v2 .inspector-tabs button.active{color:#11666b}
+.design-v2 .inspector-tabs button.active:after{background:#137b80}
+.design-v2 .inspector-content{padding:20px}
+.design-v2 .inspector-title-row h2{font-size:19px;font-weight:650}
+.design-v2 .inspector-title-row>span{color:#11666b}
+.design-v2 .inspector-intro{font-size:11px;margin:7px 0 16px}
+.design-v2 .budget-compact{padding:12px;border-radius:8px;background:#f2f7f7;border-color:#d4e7e7}
+.design-v2 .budget-compact div>span,.design-v2 .budget-compact>span{font:600 10px "Avenir Next","Segoe UI",sans-serif}
+.design-v2 .budget-compact strong{font:650 22px "Avenir Next","Segoe UI",sans-serif;color:#11666b}
+.design-v2 .decision-slot{min-height:49px;grid-template-columns:22px minmax(80px,1fr) 72px}
+.design-v2 .slot-index,.design-v2 .measure-cost{font:600 10px "Avenir Next","Segoe UI",sans-serif}
+.design-v2 .select-wrap select{font-size:11px;border-radius:6px;padding:8px 20px 8px 8px}
+.design-v2 .load-scenario{color:#11666b;font-size:11px;margin:14px 0}
+.design-v2 .button{height:38px;border-radius:6px;font-size:11px}
+.design-v2 .button-primary{background:#11666b;border-color:#11666b}
+.design-v2 .result-strip{margin:14px 0 0;border:1px solid var(--border);border-radius:10px;padding:19px 22px;box-shadow:0 2px 12px #0f1b2907}
+.design-v2 .result-strip-heading h2{font-size:18px}
+.design-v2 .result-empty strong,.design-v2 .score-secondary>span{font-size:11px}
+.design-v2 .result-empty p,.design-v2 .district-row>b{font-size:10px}
+.design-v2 .score-main>strong{color:#11666b}
+.design-v2 .footer{font-size:10px}
+.design-v2 .indicator-dashboard{border-radius:10px;box-shadow:0 2px 12px #0f1b2907}
+@media(max-width:1200px){.design-v2 .map-workspace{grid-template-columns:225px minmax(310px,1fr) 320px}.design-v2 .brand{min-width:210px}.design-v2 .main-nav a{padding:0 7px}}
+@media(max-width:950px){.design-v2 .map-workspace{display:grid;grid-template-columns:220px minmax(0,1fr);height:auto}.design-v2 .map-view,.design-v2 .layer-sidebar{height:510px}.design-v2 .inspector{grid-column:1/-1;height:auto}.design-v2 .brand{min-width:0}.design-v2 .main-nav{display:none}.design-v2 .design-switch{margin-left:auto}}
+@media(max-width:650px){.design-v2{padding:0 12px}.design-v2 .topbar{margin:0 -12px;padding:0 12px;height:auto;min-height:62px;flex-wrap:wrap;gap:8px;padding-top:9px;padding-bottom:9px}.design-v2 .brand{font-size:11px}.design-v2 .brand small{font-size:9px}.design-v2 .design-switch{order:3;width:100%;justify-content:center}.design-v2 .topbar-meta{font-size:9px}.design-v2 .page-heading{height:auto;min-height:105px;align-items:flex-start;padding:16px 0;gap:10px}.design-v2 .page-heading h1{font-size:20px}.design-v2 .page-heading p{font-size:10px}.design-v2 .heading-tools{flex-direction:column;align-items:end}.design-v2 .scenario-picker{display:grid;grid-template-columns:1fr}.design-v2 .map-workspace{display:flex;flex-direction:column}.design-v2 .map-view{height:420px}.design-v2 .layer-sidebar{height:auto}.design-v2 .inspector{height:auto}.design-v2 .budget-compact{position:static;width:auto}}
+@media(prefers-reduced-motion:reduce){.design-v2 *, .design-v2 *::before, .design-v2 *::after{animation-duration:1ms!important;transition-duration:1ms!important}}
