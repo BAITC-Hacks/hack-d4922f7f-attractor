@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
 from engine.v1 import Selection, SimulationService, create_official_service
+from api.v2 import router as v2_router
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -169,6 +170,7 @@ def _evaluation(service: SimulationService, selections: tuple[Selection, ...]) -
 
 
 app = FastAPI(title="AKIM V1 Simulation API", version="1.0.0")
+app.include_router(v2_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
