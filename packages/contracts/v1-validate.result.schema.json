@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akim.local/contracts/v1-validate.result.schema.json",
+  "title": "V1 validation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["valid", "issues", "cost", "remainingBudget"],
+  "properties": {
+    "valid": {"type": "boolean"},
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "field", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "field": {"type": "string"},
+          "message": {"type": "string"}
+        }
+      }
+    },
+    "cost": {"type": "number"},
+    "remainingBudget": {"type": "number"}
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akim.local/contracts/v1-result.schema.json",
+  "title": "V1 evaluation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["valid", "issues", "cost", "remainingBudget", "score", "districtScores", "districtScoreDeltas", "indicators", "indicatorDeltas", "average", "minimum", "criticalCount", "decomposition"],
+  "properties": {
+    "valid": {"type": "boolean"},
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "field", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "field": {"type": "string"},
+          "message": {"type": "string"}
+        }
+      }
+    },
+    "cost": {"type": "number"},
+    "remainingBudget": {"type": "number"},
+    "score": {"type": ["number", "null"]},
+    "districtScores": {"type": "object", "additionalProperties": {"type": "number"}},
+    "districtScoreDeltas": {"type": "object", "additionalProperties": {"type": "number"}},
+    "indicators": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"type": "number"}
+      }
+    },
+    "indicatorDeltas": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"type": "number"}
+      }
+    },
+    "average": {"type": ["number", "null"]},
+    "minimum": {"type": ["number", "null"]},
+    "criticalCount": {"type": ["integer", "null"], "minimum": 0},
+    "decomposition": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["averageContribution", "minimumContribution", "criticalPenalty", "total"],
+          "properties": {
+            "averageContribution": {"$ref": "#/$defs/valueChange"},
+            "minimumContribution": {"$ref": "#/$defs/valueChange"},
+            "criticalPenalty": {"$ref": "#/$defs/valueChange"},
+            "total": {"$ref": "#/$defs/valueChange"}
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "valueChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["before", "after", "delta"],
+      "properties": {
+        "before": {"type": "number"},
+        "after": {"type": "number"},
+        "delta": {"type": "number"}
+      }
+    }
+  }
+}
