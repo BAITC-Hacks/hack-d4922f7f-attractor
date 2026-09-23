@@ -10,6 +10,7 @@ from math import fsum, isclose, isfinite
 from typing import Any, Callable, Iterable, Mapping
 
 from data_gate.domain.model import QualityIssue, Severity
+from data_gate.domain.v2_quality import OBSERVATIONS, V2_CITY, check_observations, check_v2_city
 
 CITY_V1 = "city-v1"
 TERRITORY_GEOJSON_V1 = "territory-geojson-v1"
@@ -307,6 +308,8 @@ def _geometry_problem(kind: str, coords: Any) -> str | None:
 _CHECKERS: dict[str, Callable[[Mapping[str, Any], Mapping[str, Any]], Issues]] = {
     CITY_V1: _check_city_v1,
     TERRITORY_GEOJSON_V1: _check_territory_geojson,
+    V2_CITY: check_v2_city,
+    OBSERVATIONS: check_observations,
 }
 
 

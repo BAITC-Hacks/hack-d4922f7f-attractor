@@ -24,7 +24,7 @@ jobs:
       - run: python -m ruff check engine data_gate services ai tests scripts
       - run: python -m scripts.export_openapi --check
       - run: python -m build --wheel
-      - run: python scripts/smoke_wheel.py dist/akim_simulation_engine-0.2.0-py3-none-any.whl
+      - run: python scripts/smoke_wheel.py dist/akim_simulation_engine-0.3.0-py3-none-any.whl
   compose:
     runs-on: ubuntu-latest
     env:
@@ -35,6 +35,7 @@ jobs:
       - run: docker compose up --build -d --wait --wait-timeout 120
       - run: docker compose exec -T api python -m scripts.demo_backend
       - run: docker compose exec -T api python -m scripts.demo_backend --url http://web/api
+      - run: docker compose exec -T api python -m scripts.demo_v2
       - run: curl --fail http://localhost:8080/
       - if: always()
         run: docker compose logs --tail=100

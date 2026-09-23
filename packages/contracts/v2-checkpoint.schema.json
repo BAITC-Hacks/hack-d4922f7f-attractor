@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:checkpoint",
+  "title": "Public checkpoint metadata; full state retained by the server",
+  "type": "object",
+  "required": ["id", "simMinute", "stateVersion", "hash"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^checkpoint-[0-9a-f]{24}$"},
+    "simMinute": {"type": "integer", "minimum": 0},
+    "stateVersion": {"type": "integer", "minimum": 0},
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "branchRequest": {
+      "type": "object", "required": ["checkpointId"], "additionalProperties": false,
+      "properties": {"checkpointId": {"type": "string", "minLength": 1, "maxLength": 128}}
+    }
+  }
+}

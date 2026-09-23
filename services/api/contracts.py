@@ -64,8 +64,10 @@ class PassportRequest(Contract):
 
 
 class ImportRequest(Contract):
-    format: Literal["source-text-v1", "city-json-v1", "geojson-v1"]
+    format: Literal["source-text-v1", "city-json-v1", "geojson-v1", "v2-city-json", "csv-v1",
+                    "xlsx-v1", "observations-json-v1"]
     content: Annotated[str, Field(max_length=1_000_000)]
+    encoding: Literal["utf-8", "base64"] = "utf-8"
     passport: PassportRequest
 
 

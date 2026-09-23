@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:command",
+  "title": "V2 command request; Idempotency-Key header must match body.idempotencyKey",
+  "type": "object",
+  "required": ["commandId", "idempotencyKey", "expectedStateVersion", "type"],
+  "properties": {
+    "commandId": {"type": "string", "minLength": 1, "maxLength": 128},
+    "idempotencyKey": {"type": "string", "minLength": 1, "maxLength": 128},
+    "expectedStateVersion": {"type": "integer", "minimum": 0},
+    "type": {"type": "string", "minLength": 1, "maxLength": 80},
+    "payload": {"type": "object"},
+    "issuedBy": {"type": "string", "minLength": 1, "maxLength": 128, "default": "local-user"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "accepted": {
+      "type": "object", "required": ["commandId", "accepted", "stateVersion", "status"], "additionalProperties": false,
+      "properties": {
+        "commandId": {"type": "string"}, "accepted": {"const": true},
+        "stateVersion": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["paused", "running", "cancelled"]}
+      }
+    }
+  }
+}

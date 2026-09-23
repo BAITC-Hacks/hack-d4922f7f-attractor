@@ -1,5 +1,7 @@
 """HTTP adapter. Business rules live in engine/data_gate/ai application layers."""
 from contextlib import asynccontextmanager
+import base64
+import binascii
 from hmac import compare_digest
 import os
 from typing import Annotated
@@ -52,19 +54,26 @@ class BodyLimit:
         return await self.app(scope, bounded_receive, send)
 
 
-def create_app(runtime: Runtime | None = None, *, admin_token: str | None = None) -> FastAPI:
+def create_app(runtime: Runtime | None = None, *, admin_token: str | None = None, v2_store=None) -> FastAPI:
+    from engine.v2.application.controller import RunError
+    from engine.v2.domain.simulation import DomainError
+    from services.api.v2 import V2Runtime, router
+
     @asynccontextmanager
     async def lifespan(app):
         app.state.runtime = runtime if runtime is not None else Runtime()
+        app.state.v2 = V2Runtime(app.state.runtime.gate, v2_store)
         yield
 
-    app = FastAPI(title="AKIM V1 API", version="0.2.0", lifespan=lifespan,
-                  description="Synthetic official V1. AQOL is computed by the deterministic engine, never LLM.")
+    app = FastAPI(title="AKIM V1 + V2 API", version="0.3.0", lifespan=lifespan,
+                  description="Official V1 calculator and separate synthetic V2 research laboratory.")
+    app.include_router(router())
     app.add_middleware(BodyLimit)
     origins = [s.strip() for s in os.getenv("AKIM_CORS_ORIGINS", "").split(",") if s.strip()]
     if origins:
         app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"],
-                           allow_headers=["Content-Type", "Authorization"], allow_credentials=False)
+                           allow_headers=["Content-Type", "Authorization", "Idempotency-Key", "Last-Event-ID"],
+                           allow_credentials=False)
 
     def get_runtime() -> Runtime:
         return app.state.runtime
@@ -101,6 +110,12 @@ def create_app(runtime: Runtime | None = None, *, admin_token: str | None = None
         if error.code in ("publish_blocked", "immutability_violation"):
             status = 409
         return JSONResponse({"error": error.to_api_dict()}, status)
+
+    @app.exception_handler(RunError)
+    @app.exception_handler(DomainError)
+    async def v2_error(request, error):
+        return JSONResponse({"error": {"code": error.code, "field": error.field, "message": str(error)}},
+                            getattr(error, "status", 422))
 
     def pin(request, rt):
         if request.versions is not None and request.versions.model_dump() != rt.versions:
@@ -174,7 +189,15 @@ def create_app(runtime: Runtime | None = None, *, admin_token: str | None = None
         if request.passport.datasetId == "official-v1":
             raise HTTPException(403, "official-v1 is reserved; use another datasetId for experiments")
         with rt.gate_lock:
-            record = rt.gate.create_import(request.content.encode("utf-8"), request.format,
+            content = request.content.encode("utf-8")
+            if request.encoding == "base64":
+                try:
+                    content = base64.b64decode(request.content, validate=True)
+                except (ValueError, binascii.Error) as error:
+                    raise HTTPException(422, "Invalid base64 upload") from error
+            if request.format == "xlsx-v1" and request.encoding != "base64":
+                raise HTTPException(422, "XLSX requires encoding=base64")
+            record = rt.gate.create_import(content, request.format,
                                           PassportInput.from_api_dict(request.passport.model_dump()))
             return rt.gate.get_report(record.id)
 

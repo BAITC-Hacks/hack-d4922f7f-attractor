@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:run",
+  "title": "V2 run public projection (events and metrics have separate routes)",
+  "type": "object",
+  "required": ["runId", "scenarioId", "status", "stateVersion", "horizon", "manifest", "simMinute", "pendingCommand", "speed", "simTime", "checkpoints"],
+  "properties": {
+    "runId": {"type": "string"},
+    "scenarioId": {"type": "string"},
+    "status": {"enum": ["paused", "running", "completed", "cancelled", "failed"]},
+    "stateVersion": {"type": "integer", "minimum": 0},
+    "horizon": {"type": "integer", "minimum": 1, "maximum": 5184000},
+    "manifest": {"$ref": "urn:akim:v2:run-manifest"},
+    "simMinute": {"type": "integer", "minimum": 0},
+    "pendingCommand": {"type": "boolean"},
+    "speed": {"type": "integer", "minimum": 1, "maximum": 43200},
+    "simTime": {"type": "string", "format": "date-time"},
+    "checkpoints": {"type": "array", "items": {"$ref": "urn:akim:v2:checkpoint"}},
+    "state": {"type": "object", "description": "Versioned synthetic domain state; do not use its stateVersion for HTTP concurrency"},
+    "error": {"type": "object", "required": ["code", "message"], "properties": {"code": {"type": "string"}, "message": {"type": "string"}}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "createRequest": {
+      "type": "object", "required": ["scenarioId"], "additionalProperties": false,
+      "properties": {
+        "scenarioId": {"type": "string", "minLength": 1, "maxLength": 128},
+        "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647, "default": 42},
+        "horizon": {"type": "integer", "minimum": 1, "maximum": 5184000, "default": 1440}
+      }
+    }
+  }
+}

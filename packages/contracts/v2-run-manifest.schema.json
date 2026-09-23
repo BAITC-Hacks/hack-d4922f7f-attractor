@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:run-manifest",
+  "title": "Reproducibility manifest for a synthetic V2 run",
+  "type": "object",
+  "required": ["runId", "scenarioId", "mode", "codeRevision", "modelVersion", "dataSnapshotId", "dataHash", "parameterHash", "parameterSetId", "seed", "rngVersion", "runtimeVersion", "llmPolicyVersion", "startSimTime", "endSimTime", "familyId"],
+  "properties": {
+    "runId": {"type": "string", "pattern": "^run-[0-9a-f]{24}$"},
+    "scenarioId": {"type": "string"},
+    "mode": {"const": "dynamic-v2"},
+    "codeRevision": {"type": "string"},
+    "modelVersion": {"type": "string"},
+    "dataSnapshotId": {"type": "string"},
+    "dataHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "parameterHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "parameterSetId": {"type": "string"},
+    "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "rngVersion": {"type": "string"},
+    "runtimeVersion": {"type": "string"},
+    "llmPolicyVersion": {"type": "string"},
+    "startSimTime": {"type": "string", "format": "date-time"},
+    "endSimTime": {"type": "string", "format": "date-time"},
+    "familyId": {"type": "string"},
+    "branchOf": {
+      "type": "object", "required": ["runId", "checkpointId"], "additionalProperties": false,
+      "properties": {"runId": {"type": "string"}, "checkpointId": {"type": "string"}}
+    }
+  },
+  "additionalProperties": false
+}

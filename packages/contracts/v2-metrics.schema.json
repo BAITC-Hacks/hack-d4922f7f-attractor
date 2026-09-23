@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:metrics",
+  "title": "Metric series and corresponding evidence returned by GET /runs/{id}/metrics",
+  "type": "object", "required": ["series", "evidence"], "additionalProperties": false,
+  "properties": {
+    "series": {"type": "array", "items": {"$ref": "#/$defs/metricSeries"}},
+    "evidence": {"type": "array", "items": {"$ref": "urn:akim:v2:evidence"}}
+  },
+  "$defs": {
+    "metricSeries": {
+      "type": "object", "required": ["metricId", "unit", "window", "aggregation", "groupBy", "points", "evidenceIds"], "additionalProperties": false,
+      "properties": {
+        "metricId": {"type": "string"}, "unit": {"type": "string"},
+        "window": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string", "format": "date-time"}},
+        "aggregation": {"type": "string"},
+        "groupBy": {"type": "object", "required": ["districtId"], "properties": {"districtId": {"type": ["string", "null"]}}, "additionalProperties": false},
+        "points": {
+          "type": "array", "items": {
+            "type": "object", "required": ["simMinute", "simTime", "value", "evidenceId"], "additionalProperties": false,
+            "properties": {
+              "simMinute": {"type": "integer", "minimum": 0},
+              "simTime": {"type": "string", "format": "date-time"},
+              "value": {"type": ["number", "null"]}, "evidenceId": {"type": "string"}
+            }
+          }
+        },
+        "evidenceIds": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

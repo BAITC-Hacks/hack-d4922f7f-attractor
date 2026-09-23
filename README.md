@@ -33,7 +33,9 @@ V1 сохраняет исходные правила без изменений.
 
 Реализован **бэкенд V1**: API, evaluator, Data Gate, локальный поиск альтернатив,
 отчёт с evidence. Фронтенд из актуального main подключён к API через адаптер;
-Compose поднимает оба слоя. V2 остаётся планом. AI и альтернативы пока доступны
+Compose поднимает оба слоя. В этой ветке добавлен **бэкенд V2-demo**: отдельный
+worker, PostgreSQL, события, часы, checkpoint/ветки, парные эксперименты и экспорт.
+Фронтенд V2 разрабатывается отдельно и здесь **не изменён**. AI и альтернативы V1 пока доступны
 через API/Swagger, но не подключены к кнопкам текущего интерфейса.
 LLM-адаптер проверен тестовыми ответами; живой вызов провайдера в этом прогоне
 **не выполнялся**. Без ключа явно возвращается `mode: rule-based`.
@@ -46,6 +48,15 @@ LLM-адаптер проверен тестовыми ответами; жив�
 | Альтернативы | Перебор одной замены меры/района; фиксация решений | Найден вариант **57.20556** за **100** |
 | Объяснение | Сильные стороны, риски, последствия и проверенные предложения | Числа и формулировки берутся из серверного evidence |
 | API-first | OpenAPI, проверка версий, структурные ошибки | HTTP integration tests |
+| V2 «Снегопад» | 6 синтетических районов, транспортный спрос, бригады, очереди и обращения | `python -m scripts.demo_v2` |
+| V2 лаборатория | Сохраняемые прогоны, идемпотентные команды, replay, ветки, парные seed | Экспорт manifest/state/events + интервалы различий |
+| V2 стратегический прототип | Когорты и миграция, жильё, проекты, проводки, синтетические голосования | Балансы населения и денег; статус каждого модуля в `/v2/catalog` |
+
+Полная исследовательская платформа из ТЗ **не объявляется завершённой**:
+транспорт пока агрегированный, нет мультимодального графа, калибровки, модулей
+озеленения/безопасности и полного десятилетнего политико-бюджетного сценария.
+[Реализованное и ограничения V2](docs/V2-IMPLEMENTATION.md) ·
+[Контракт для фронтенда](docs/V2-API.md).
 
 ## Быстрый старт
 
@@ -54,30 +65,36 @@ LLM-адаптер проверен тестовыми ответами; жив�
 для этого способа не нужны. До merge используйте эту ветку:
 
 ```bash
-git clone --branch fix/backend-readiness https://github.com/BAITC-Hacks/hack-d4922f7f-attractor.git
+git clone --branch feat/v2-simulation https://github.com/BAITC-Hacks/hack-d4922f7f-attractor.git
 cd hack-d4922f7f-attractor
 docker compose up --build -d --wait
 ```
 
 После клонирования запуск всего проекта — **одна последняя команда**, без обязательного
 `.env` и без ключей. Compose собирает `web` (React + nginx) и `api` (FastAPI +
-engine + Data Gate); ждёт healthcheck. Отдельной БД сейчас нет.
+engine + Data Gate), `worker` V2 и `db` (PostgreSQL); ждёт healthcheck.
+База не публикует порт на хост. Для стабильного V1 без V2 сохранена ветка `fix/backend-readiness`.
 
 | Куда открыть | Что находится |
 | --- | --- |
 | [localhost:8080](http://localhost:8080) | Веб-интерфейс с живым API, не mock-расчётом |
 | [localhost:8000/docs](http://localhost:8000/docs) | Swagger: расчёт, альтернативы, анализ и Data Gate |
 | [localhost:8000/health](http://localhost:8000/health) | Готовность бэкенда и версии снимка |
+| [localhost:8000/v2/catalog](http://localhost:8000/v2/catalog) | V2: снимок, параметры, единицы, ограничения модулей |
+| [localhost:8000/v2/health](http://localhost:8000/v2/health) | Heartbeat отдельного worker V2 |
 
 Проверьте сквозной сценарий (каталог → расчёт → альтернативы → отчёт):
 
 ```bash
 docker compose exec -T api python -m scripts.demo_backend
 docker compose exec -T api python -m scripts.demo_backend --url http://web/api
+docker compose exec -T api python -m scripts.demo_v2
 ```
 
 Вторая команда проверяет также nginx-прокси, которым пользуется браузер.
 Ожидается `score: 56.54307`, `cost: 95`, `analysisMode: rule-based`.
+Третья воспроизводит снегопад, ветку с переброской бригады, сравнение по трём seed,
+evidence-отчёт и проверяет ZIP-экспорт. Она не вызывает платный LLM.
 
 <details>
 <summary>Настройки, логи, остановка и повторный запуск</summary>
@@ -93,12 +110,12 @@ Compose подставляет параметры из `.env`; переменн�
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 api web
+docker compose logs --tail=100 api worker db
 docker compose down
 docker compose up --build -d --wait
 ```
 
-`down` останавливает контейнеры, **но сохраняет данные** в named volume `data-gate`.
+`down` останавливает контейнеры, **но сохраняет данные** в named volumes `data-gate` и `v2-postgres`.
 Не добавляйте `-v`, если снимки/импорты нужны: `docker compose down -v` удаляет их.
 Не запускайте несколько API workers или параллельный CLI writer на этом volume.
 API работает от непривилегированного пользователя; наружу порты привязаны только к localhost.
@@ -138,6 +155,13 @@ python3 -m venv .venv
 [Swagger UI](http://127.0.0.1:8000/docs) · [Каталог](http://127.0.0.1:8000/catalog).
 API сам импортирует и публикует официальный исходник. Хранилище:
 `var/data-gate` относительно текущего каталога. Запускать **один worker**.
+Для V2 запустите **ещё один терминал из того же каталога**:
+`.venv/Scripts/python -m engine.v2.infrastructure.worker`
+(Linux/macOS: `.venv/bin/python -m engine.v2.infrastructure.worker`).
+Без `AKIM_DATABASE_URL` API и worker используют локальный SQLite-файл
+`var/v2/state.sqlite3`; в Compose всегда используется PostgreSQL.
+`AKIM_RUN_TOKEN` защищает изменяющие V2-запросы; пустое значение допустимо только
+для локального однопользовательского демо. `AKIM_ADMIN_TOKEN` отдельно защищает Data Gate.
 Это запуск только API. Для локальной разработки интерфейса дополнительно нужны
 Node.js 22 и npm: в `apps/web` выполните `npm ci` и запустите `npm run dev` с
 `VITE_API_PROXY=true` в окружении. Без этого переключателя dev UI использует fixtures.
@@ -180,6 +204,9 @@ Compose его не запускает.
 | --- | --- | --- |
 | Аким / API | HTTP, доступ к импорту, версии, сборка use cases | `services/api` |
 | Город | Валидация, точный расчёт, локальные альтернативы | `engine/v1` |
+| Динамический город | Временные переходы, ledger, очереди, когорты, проекты | `engine/v2/domain` |
+| Прогоны и лаборатория | Команды, checkpoint, replay, ветвление, ансамбли | `engine/v2/application` |
+| Worker и хранилище | Отдельный процесс, атомарные пакеты, PostgreSQL; локально SQLite | `engine/v2/infrastructure` |
 | Данные | Парсеры, паспорт, quality gate, snapshots, lineage | `data_gate` |
 | AI-аналитик | Выбор подтверждённых фактов, read-only tools, fallback | `ai` |
 
@@ -211,7 +238,7 @@ CI для Python 3.11/3.12 и Compose добавлен; удалённый ре�
 
 | Проверка | Результат |
 | --- | --- |
-| Автотесты | **109 Python + 3 Node**: engine, Data Gate, HTTP, search, AI policy и UI adapter |
+| Автотесты | **140 Python** (139 общий запуск + 1 новый контрактный отдельно), **3 Node**; без многократного полного прогона |
 | База без мер (диагностика) | **52.55768** |
 | Контрольный портфель за 95 | **56.54307** |
 | Декомпозиция прироста | **+0.85064 +1.13475 +2 = +3.98539** |
@@ -219,7 +246,13 @@ CI для Python 3.11/3.12 и Compose добавлен; удалённый ре�
 | Официальный импорт | **0 critical / 0 warning** |
 | Установка | `pip install`, сборка wheel, ресурсы и HTTP smoke вне checkout |
 | Статические проверки | Ruff, `pip check`, синхронизация OpenAPI |
-| Docker Compose | API и web healthy; demo через API и nginx; данные сохраняются при пересоздании контейнеров |
+| Docker Compose | API, worker, PostgreSQL и web healthy; V1 через nginx и V2 HTTP-demo прошли |
+| V2, три парных seed | Медиана изменения `service-unavailability-hours`: **−68.8702**, p05…p95 **−70.8670…−63.4259**; дополнительный расход **5 000 модельных KZT** |
+
+V2-числа — результат **синтетического** опыта за 840 модельных минут, а не прогноз
+реального города. Интервал по трём seed иллюстрирует воспроизводимость, но слишком мал
+для исследовательского вывода. Полный протокол и исходы: [v2-demo.json](docs/evidence/v2-demo.json).
+Бюджет выполним в обеих ветках; равенство фактических расходов **не заявляется**.
 
 ## API-first контракты
 
@@ -234,6 +267,14 @@ CI для Python 3.11/3.12 и Compose добавлен; удалённый ре�
 | `GET /datasets/imports/{id}/report` | Report, mapping, preview; admin token |
 | `POST /datasets/imports/{id}/publish` | Публикация с принятием warnings; admin token |
 | `GET /datasets` | Наборы и manifest; admin token |
+| `GET /v2/catalog`, `GET /v2/health` | Данные/допущения V2 и состояние worker |
+| `POST /scenarios`, `POST /runs` | Immutable-сценарий и отдельный прогон с seed |
+| `POST /runs/{id}/commands` | Часы и управленческие решения; версия и idempotency key |
+| `POST /runs/{id}/checkpoints`, `/branches`, `/replay` | Сохранение, ветки и проверка воспроизводимости |
+| `GET /runs/{id}/events`, `/metrics`, `/trace/{eventId}` | SSE с cursor, ряды, evidence и причинная трасса |
+| `GET /runs/{id}/population`, `/development`, `/flows`, `/politics` | Стратегические подсистемы и проводки |
+| `POST /experiments`, `GET /experiments/{id}` | Асинхронные парные ансамбли; эмпирические интервалы |
+| `POST /assistant/messages`, `GET /runs/{id}/export` | Rule-based evidence-отчёт V2 и ZIP воспроизведения |
 
 Неверная структура → 422; устаревшие версии / запрещённая публикация → 409;
 нет доступа → 403; body >1 200 000 байт → 413.
@@ -253,6 +294,10 @@ LLM выбирает/упорядочивает готовые evidence IDs. С�
 | `AKIM_DATA_GATE_DIR` | Путь при прямом Python-запуске; Compose фиксирует путь persistent volume |
 | `AKIM_CORS_ORIGINS` | Разрешённые адреса UI через запятую; по умолчанию закрыто |
 | `AKIM_ADMIN_TOKEN` | Bearer token для Data Gate; без него HTTP-доступ закрыт |
+| `AKIM_RUN_TOKEN` | Bearer token для управления V2; пустой только для локального demo |
+| `AKIM_DB_PASSWORD` | Пароль внутренней PostgreSQL Compose; demo-default не для production |
+| `AKIM_DATABASE_URL`, `AKIM_V2_STORE` | PostgreSQL URL либо SQLite-файл при запуске без Compose |
+| `AKIM_CODE_REVISION` | Метка сборки/commit в manifest; задайте при выпуске |
 | `AKIM_LLM_ENABLED=1` | Явное включение платных запросов |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Ключ и доступная Responses-модель с tools/structured outputs |
 | `AKIM_LLM_MAX_ANALYSES` | Анализов на процесс: по умолчанию 10, максимум 100 |
@@ -265,7 +310,9 @@ SDK retries отключены. Это не денежный лимит: нас�
 
 ## Data Gate
 
-Поддержаны исходник задания, City JSON, GeoJSON WGS84. Дубли JSON-ключей,
+Поддержаны исходник задания, City JSON, GeoJSON WGS84, синтетический V2 City,
+CSV/XLSX/JSON для нормализованных наблюдений с единицами, provenance и тремя временами.
+Это определённые схемы, не автоматическое понимание произвольной таблицы. Дубли JSON-ключей,
 NaN/Infinity, неверные типы/даты/ссылки не исправляются молча. Критические ошибки
 блокируют публикацию; checksum staging и snapshot проверяется при чтении.
 Идентичность импорта учитывает байты, формат, паспорт и transform version.
@@ -280,6 +327,9 @@ NaN/Infinity, неверные типы/даты/ссылки не исправ�
 
 ```text
 engine/v1/          правила, evaluator, application service, локальный search
+engine/v2/domain/   scheduler и чистые переходы синтетического города
+engine/v2/application/ прогоны, команды, checkpoint, ветки, replay, эксперименты
+engine/v2/infrastructure/ Data Gate adapter, PostgreSQL/SQLite, отдельный worker
 data_gate/          import, quality, snapshots, файловые/in-memory adapters, CLI
 services/api/       HTTP-модели, маршруты, доступ, composition root
 ai/                 evidence policy и Responses adapter
@@ -288,7 +338,7 @@ data/               исходник и эталонный fixture (входят
 tests/              golden, regression, integration, search, AI contract tests
 scripts/            HTTP demo, OpenAPI export, wheel smoke
 apps/web/           React UI и адаптер HTTP-контрактов
-compose.yaml        API + web + постоянный volume, healthchecks
+compose.yaml        API + worker + PostgreSQL + существующий web; volumes и healthchecks
 deploy/             nginx reverse proxy для web → API
 docs/               спецификации, аудит, evidence
 assets/             логотип и будущие изображения README
@@ -299,18 +349,25 @@ assets/             логотип и будущие изображения READ
 **Перед защитой:** подключить кнопки AI/альтернатив, записать демо, проверить живую LLM-модель
 и сравнить пользу с rule-based baseline, получить зелёный CI. Сроки не зафиксированы.
 
-**Следующий этап:** транзакционный PostgreSQL-адаптер, роли, наблюдаемость и замеры
-нагрузки; затем отдельный V2 scheduler, ledger, replay по [плану](docs/08-delivery-plan.md).
+**Следующий этап:** расширить `engine/v2/domain` графом маршрутов и полным бюджетным
+циклом; вынести event log из JSON-документа в отдельную PostgreSQL-таблицу, добавить
+RBAC и измерить задержки на длинном горизонте. Очередь, worker и replay уже есть.
 
 **Дальше:** реальные разрешённые данные, калибровка/holdout, новые `SourceParser`
-adapters и ансамбли V2. Масштабирование обосновывается измерениями.
+adapters и анализ параметрической неопределённости поверх ансамблей V2.
+Первое ограничение роста — размер полного run-документа и журналов; масштабирование
+обосновывается измерениями, не числом нарисованных агентов.
 
 ## Ограничения
 
 - V1 — синтетическое задание, не прогноз и не доказательство причинного эффекта.
 - Поиск локальный: глобальный максимум не заявляется.
-- Live LLM, пользовательские исследования и V2 не подтверждены этим прогоном.
+- Live LLM и пользовательские исследования не подтверждены этим прогоном.
   UI собирается и связан с API; это ещё не полная UX-приёмка.
+- V2 — **частичный V2-demo**, не полная реализация всех MUST ТЗ. Коридорное время
+  поездки — модельный proxy, не измеренный P90; интервалы seed не являются confidence interval.
+  В стратегическом режиме услуги агрегируются по суткам, месяц равен 30 дням.
+  Субсуточную погоду проверяйте в оперативном режиме.
 - Файловый Data Gate: один процесс-писатель; не запускайте CLI/API одновременно
   на одном хранилище. Lock API не заменяет межпроцессные транзакции.
 - Нет готового публичного production deployment, RBAC, постоянного бюджета LLM

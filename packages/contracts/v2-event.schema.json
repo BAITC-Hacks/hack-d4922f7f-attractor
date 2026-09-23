@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:event",
+  "title": "SSE or polled city event; sequence is scoped to a run",
+  "type": "object",
+  "required": ["id", "seq", "simMinute", "type", "actorId", "districtId", "causedBy", "payloadSchemaVersion", "payload", "runId", "simTime", "recordedAt"],
+  "properties": {
+    "id": {"type": "string"},
+    "seq": {"type": "integer", "minimum": 1},
+    "simMinute": {"type": "integer", "minimum": 0},
+    "type": {"type": "string"},
+    "actorId": {"type": ["string", "null"]},
+    "districtId": {"type": ["string", "null"]},
+    "causedBy": {"type": "array", "items": {"type": "string"}},
+    "payloadSchemaVersion": {"type": "string"},
+    "payload": {"type": "object"},
+    "runId": {"type": "string"},
+    "simTime": {"type": "string", "format": "date-time"},
+    "recordedAt": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

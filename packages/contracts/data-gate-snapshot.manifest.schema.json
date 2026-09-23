@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["id", "datasetId", "importId", "publishedAt", "passport", "acceptedWarnings"],
   "properties": {
-    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*--[0-9a-f]{12}$"},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*--[0-9a-f]{16}$"},
     "datasetId": {"type": "string"},
     "importId": {"type": "string"},
     "publishedAt": {"type": "string"},

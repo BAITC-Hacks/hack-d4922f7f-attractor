@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:akim:v2:scenario",
+  "title": "Immutable V2 scenario response (snapshot body excluded)",
+  "type": "object",
+  "required": ["id", "createdAt", "mode", "name", "dataSnapshotId", "weatherScenarioId", "economyScenarioId", "timeMode", "parameters", "modelVersion", "rulesVersion", "parameterSetId", "dataHash"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^scenario-[0-9a-f]{24}$"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "mode": {"const": "dynamic-v2"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "dataSnapshotId": {"type": "string"},
+    "weatherScenarioId": {"enum": ["snow", "clear"]},
+    "economyScenarioId": {"const": "synthetic-baseline"},
+    "timeMode": {"enum": ["operational", "strategic"]},
+    "parameters": {"type": "object"},
+    "modelVersion": {"type": "string"},
+    "rulesVersion": {"type": "string"},
+    "parameterSetId": {"type": "string"},
+    "dataHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "createRequest": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "mode": {"const": "dynamic-v2", "default": "dynamic-v2"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 120},
+        "dataSnapshotId": {"type": ["string", "null"], "minLength": 1, "maxLength": 128},
+        "weatherScenarioId": {"enum": ["snow", "clear"], "default": "snow"},
+        "economyScenarioId": {"const": "synthetic-baseline", "default": "synthetic-baseline"},
+        "timeMode": {"enum": ["operational", "strategic"], "default": "operational"},
+        "parameters": {"type": "object"}
+      }
+    }
+  }
+}
