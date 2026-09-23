@@ -1,0 +1,60 @@
+{
+  "valid": false,
+  "issues": [
+    {
+      "code": "INCOMPATIBLE_MEASURES",
+      "field": "selections",
+      "message": "Меры M1 и M3 несовместимы глобально.",
+      "selectionIndexes": [
+        0,
+        1
+      ],
+      "measureIds": [
+        "M1",
+        "M3"
+      ]
+    },
+    {
+      "code": "INCOMPATIBLE_MEASURES",
+      "field": "selections",
+      "message": "Меры M4 и M7 конфликтуют в районе nura.",
+      "selectionIndexes": [
+        2,
+        3
+      ],
+      "measureIds": [
+        "M4",
+        "M7"
+      ],
+      "districtId": "nura"
+    },
+    {
+      "code": "CITY_MEASURE_HAS_DISTRICT",
+      "field": "selections[4].districtId",
+      "message": "Для городской меры M12 districtId должен быть null.",
+      "selectionIndexes": [
+        4
+      ],
+      "measureIds": [
+        "M12"
+      ],
+      "districtId": "esil"
+    },
+    {
+      "code": "BUDGET_EXCEEDED",
+      "field": "selections",
+      "message": "Стоимость 101 превышает бюджет 100.",
+      "limit": 100,
+      "actual": 101
+    }
+  ],
+  "cost": 101,
+  "remainingBudget": -1,
+  "score": null,
+  "districtScores": [],
+  "indicators": [],
+  "average": null,
+  "minimum": null,
+  "criticalCount": null,
+  "decomposition": null
+}

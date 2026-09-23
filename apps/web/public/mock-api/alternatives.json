@@ -1,0 +1,51 @@
+{
+  "versions": {
+    "catalogVersion": "official-v1",
+    "dataSnapshotId": "astana-v1-source-dataset",
+    "modelVersion": "official-v1",
+    "rulesVersion": "official-v1"
+  },
+  "selections": [
+    {
+      "measureId": "M7",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M8",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M10",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M12",
+      "districtId": null
+    },
+    {
+      "measureId": "M5",
+      "districtId": "saryarka"
+    }
+  ],
+  "constraints": {
+    "fixedSelections": [
+      {
+        "measureId": "M7",
+        "districtId": "nura"
+      },
+      {
+        "measureId": "M8",
+        "districtId": "nura"
+      }
+    ],
+    "allowedDistrictIds": [
+      "esil",
+      "almaty",
+      "saryarka",
+      "baykonur",
+      "nura"
+    ],
+    "maxReplacements": 1,
+    "resultLimit": 1
+  }
+}

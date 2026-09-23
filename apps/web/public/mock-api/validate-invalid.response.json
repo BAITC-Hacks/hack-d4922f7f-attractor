@@ -1,0 +1,84 @@
+{
+  "valid": false,
+  "issues": [
+    {
+      "code": "SELECTION_COUNT",
+      "field": "selections",
+      "message": "Ровно 5 решений; получено 6.",
+      "limit": 5,
+      "actual": 6
+    },
+    {
+      "code": "DUPLICATE_MEASURE",
+      "field": "selections[1].measureId",
+      "message": "Мера M1 выбрана повторно.",
+      "selectionIndexes": [
+        0,
+        1
+      ],
+      "measureIds": [
+        "M1"
+      ]
+    },
+    {
+      "code": "INCOMPATIBLE_MEASURES",
+      "field": "selections",
+      "message": "Меры M1 и M3 несовместимы глобально.",
+      "selectionIndexes": [
+        0,
+        2
+      ],
+      "measureIds": [
+        "M1",
+        "M3"
+      ]
+    },
+    {
+      "code": "DIRECTION_LIMIT_EXCEEDED",
+      "field": "selections",
+      "message": "Выбрано три меры направления transport при максимуме 2.",
+      "selectionIndexes": [
+        0,
+        1,
+        2
+      ],
+      "limit": 2,
+      "actual": 3
+    },
+    {
+      "code": "INCOMPATIBLE_MEASURES",
+      "field": "selections",
+      "message": "Меры M4 и M7 конфликтуют в районе nura.",
+      "selectionIndexes": [
+        3,
+        4
+      ],
+      "measureIds": [
+        "M4",
+        "M7"
+      ],
+      "districtId": "nura"
+    },
+    {
+      "code": "CITY_MEASURE_HAS_DISTRICT",
+      "field": "selections[5].districtId",
+      "message": "Для городской меры M12 districtId должен быть null.",
+      "selectionIndexes": [
+        5
+      ],
+      "measureIds": [
+        "M12"
+      ],
+      "districtId": "esil"
+    },
+    {
+      "code": "BUDGET_EXCEEDED",
+      "field": "selections",
+      "message": "Стоимость 119 превышает бюджет 100.",
+      "limit": 100,
+      "actual": 119
+    }
+  ],
+  "cost": 119,
+  "remainingBudget": -19
+}

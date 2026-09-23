@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+.pnpm-store/
+node_modules/
+dist/
+*.tsbuildinfo
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
+/package-lock.json
+packages/contracts/pnpm-lock.yaml
