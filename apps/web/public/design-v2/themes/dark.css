@@ -1,0 +1,240 @@
+/* Astana Decision Twin — dark theme
+   Load after the preview's inline stylesheet. The map remains a real MapLibre
+   basemap; this layer only lowers its luminance and restyles the application. */
+
+:root {
+  color-scheme: dark;
+
+  /* Semantic surfaces and text */
+  --color-bg: #101820;
+  --color-surface: #19232d;
+  --color-surface-subtle: #202d38;
+  --color-text: #f1f5f7;
+  --color-text-muted: #b0bec8;
+  --color-border: #354552;
+  --color-border-strong: #526574;
+  --color-primary: #69c5bc;
+  --color-primary-hover: #82d7ce;
+  --color-focus: #a4e8df;
+  --color-prediction: #f0c477;
+  --color-danger: #f0918d;
+  --color-success: #75c99c;
+
+  /* Component and visualization tokens */
+  --panel-bg: #19232df5;
+  --panel-border: #354552;
+  --button-bg: #202d38;
+  --button-fg: #f1f5f7;
+  --button-border: #465865;
+  --map-overlay: rgb(10 19 27 / 24%);
+  --chart-grid: #3a4a57;
+  --shadow-soft: 0 8px 26px rgb(0 0 0 / 30%);
+  --shadow-map: 0 18px 42px rgb(0 0 0 / 42%);
+
+  /* Existing primitives, remapped for inherited selectors */
+  --ink-950: #101820;
+  --ink-900: #19232d;
+  --ink-800: #253541;
+  --slate-700: #c5d0d8;
+  --slate-600: #b0bec8;
+  --slate-500: #95a6b2;
+  --ice-300: #aabac5;
+  --ice-200: #43535f;
+  --ice-100: #293741;
+  --snow-100: #151f28;
+  --snow-50: #1c2832;
+  --white: #f1f5f7;
+  --teal-700: #69c5bc;
+  --teal-600: #55b5ac;
+  --teal-500: #82d7ce;
+  --teal-200: #254c4c;
+  --brass-600: #e9bd6b;
+  --brass-500: #efc477;
+  --brass-100: #3b3325;
+  --violet-600: #b3a7e3;
+  --red-600: #f0918d;
+  --red-100: #412c30;
+  --green-600: #75c99c;
+  --green-100: #233c32;
+}
+
+body { background: var(--color-bg); color: var(--color-text); }
+
+.topbar {
+  background: #111b24;
+  border-bottom-color: #354552;
+}
+.brand-mark { color: #9de0d8; border-color: #527d7b; }
+.brand-subtitle, .top-stat-label { color: #bdcbd3; }
+.top-stat-value small { color: #84d5b0; }
+
+.workspace { background: #354552; }
+.rail { background: var(--panel-bg); scrollbar-color: #526574 #19232d; }
+.rail-section { border-bottom-color: var(--color-border); }
+.section-note, .scenario-meta, .control-label,
+.metric-summary-item span, .district-profile { color: var(--color-text-muted); }
+
+.scenario-option {
+  background: var(--button-bg);
+  border-color: var(--button-border);
+  color: var(--color-text);
+}
+.scenario-option:hover, .layer-toggle:hover, .map-district-button:hover,
+.map-canvas .maplibregl-ctrl-group button:hover { background-color: #2a3945; }
+.scenario-option[aria-pressed="true"] {
+  background: #20383a;
+  border-color: #69c5bc;
+  box-shadow: inset 3px 0 0 #69c5bc;
+}
+.scenario-glyph { background: #2a3945; color: #c5d0d8; }
+.scenario-option[aria-pressed="true"] .scenario-glyph { color: #b1eee6; background: #28504e; }
+.scenario-score { color: #f1f5f7; }
+
+.select {
+  color: var(--color-text);
+  background: #202d38;
+  border-color: var(--color-border-strong);
+}
+.select option { color: #f1f5f7; background: #202d38; }
+.mode-switch { background: #121c25; border-color: var(--color-border); }
+.mode-button { color: #bdcbd3; }
+.mode-button:hover { color: #fff; background: #2a3945; }
+.mode-button[aria-pressed="true"] { color: #f1f5f7; background: #354653; box-shadow: 0 1px 5px rgb(0 0 0 / 35%); }
+.layer-name { color: #e7edf1; }
+.layer-swatch { border-color: rgb(255 255 255 / 32%); }
+.switch { background: #53636f; }
+.switch::after { background: #f4f7f8; }
+.layer-toggle[aria-pressed="true"] .switch { background: #4fa99f; }
+
+.disclaimer {
+  color: #f4dba9;
+  background: #382f20;
+  border-color: #675330;
+}
+
+/* Preserve street and water detail while setting geographic context back. */
+.map-stage, .map-canvas { background: #18252e; }
+.map-basemap {
+  filter: grayscale(.72) saturate(.66) contrast(1.08) brightness(.57);
+  opacity: .94;
+}
+.map-wash { background: linear-gradient(145deg, rgb(11 22 31 / 18%), rgb(13 28 37 / 32%)); }
+.context-water { stroke: #4c879d; opacity: .76; }
+.context-road { stroke: rgb(197 211 219 / 55%); }
+.context-road-major { stroke: rgb(226 235 239 / 78%); }
+.context-boundary { stroke: rgb(205 221 229 / 36%); }
+.context-label {
+  fill: #f1f5f7;
+  stroke: rgb(15 25 34 / 92%);
+  stroke-width: 4px;
+}
+.district-shape {
+  fill: var(--district-fill, rgb(70 183 173 / 37%));
+  stroke: rgb(211 230 235 / 78%);
+}
+.district-shape:hover, .district-shape:focus-visible { stroke: #fff; }
+.district-shape.is-selected {
+  stroke: #f4cf86;
+  filter: drop-shadow(0 3px 7px rgb(0 0 0 / 62%));
+}
+.district-label {
+  fill: #fff;
+  stroke: rgb(14 25 34 / 94%);
+}
+.poi-dot { fill: #e6fffb; stroke: #227e79; }
+.measure-marker { fill: #efc477; stroke: #18232d; }
+.reaction-marker { fill: #b3a7e3; stroke: #18232d; }
+
+.map-canvas .maplibregl-ctrl-group {
+  background: #202d38;
+  border-color: #526574;
+}
+.map-canvas .maplibregl-ctrl-group button { background-color: #202d38; }
+.map-canvas .maplibregl-ctrl-group button + button { border-top-color: #465865; }
+.map-canvas .maplibregl-ctrl-icon { filter: invert(.88); }
+.map-canvas .maplibregl-popup-content {
+  color: #f1f5f7;
+  background: #192630;
+  border-color: #526574;
+}
+.map-canvas .maplibregl-popup-tip { border-top-color: #192630; border-bottom-color: #192630; }
+.map-canvas .maplibregl-popup-content strong { color: #fff; }
+.map-canvas .maplibregl-popup-content span { color: #bdcbd3; }
+.map-status {
+  color: #f4dba9;
+  background: #382f20;
+  border-color: #675330;
+}
+.map-district-button {
+  color: #e7edf1;
+  background: rgb(27 40 50 / 96%);
+  border-color: #526574;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 42%);
+}
+.map-district-button[aria-pressed="true"] {
+  color: #10201f;
+  background: #85d9ce;
+  border-color: #85d9ce;
+}
+.map-title-card, .map-legend {
+  color: #f1f5f7;
+  background: rgb(25 36 46 / 96%);
+  border-color: #526574;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+}
+.map-title-card p, .legend-head { color: #bdcbd3; }
+.source-pill {
+  color: #b8eee6;
+  background: #203b3b;
+  border-color: #3c6965;
+}
+.legend-scale { color: #e3ebef; }
+
+.timeline-panel {
+  color: #f1f5f7;
+  background: rgb(18 28 37 / 96%);
+  border-color: #526574;
+}
+.timeline-caption, .quarter-labels, .timeline-event span { color: #bdcbd3; }
+.timeline-event strong { color: #f2d59d; }
+.quarter-range { accent-color: #82d7ce; }
+
+.district-header { background: #17232d; }
+.district-score-badge { background: #26343f; border-color: #52616c; }
+.district-score-badge span { color: #bdcbd3; }
+.metric-summary { background: #19232d; border-bottom-color: var(--color-border); }
+.metric-summary-item { border-right-color: var(--color-border); }
+.delta-positive { color: #85d7a9; }
+.chart-wrap { border-bottom-color: var(--color-border); }
+.chart-label, .prediction-tag { color: #f0c477; }
+.chart-grid-line { stroke: #42525e; }
+.chart-axis-label { fill: #b0bec8; }
+.chart-line-before { stroke: #8b9aa4; }
+.chart-line-after { stroke: #69c5bc; }
+.chart-point { fill: #19232d; stroke: #82d7ce; }
+.chart-now { stroke: #efc477; }
+.indicator-track { background: #34434e; }
+.indicator-bar { background: #55b5ac; }
+.recommendation { background: #202d38; border-color: #43535f; }
+.recommendation p { color: #bdcbd3; }
+.evidence-link { color: #8ce0d6; }
+.evidence-link:hover { color: #c2fff7; }
+
+button, select, input, [tabindex] { -webkit-tap-highlight-color: rgb(130 215 206 / 18%); }
+button:focus-visible, select:focus-visible, input:focus-visible,
+[tabindex]:focus-visible, .district-shape:focus-visible {
+  outline: 3px solid #a4e8df;
+  outline-offset: 3px;
+}
+button:active, .map-district-button:active { filter: brightness(1.12); }
+.map-canvas .maplibregl-ctrl-group button:focus-visible { z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

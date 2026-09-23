@@ -6,7 +6,7 @@ WORKDIR /app/apps/web
 RUN npm ci
 COPY apps/web ./
 ENV VITE_API_BASE_URL=/api
-RUN node --test src/infrastructure/httpV1Api.test.mjs && npm run build
+RUN node --test src/infrastructure/httpV1Api.test.mjs tests/previewApi.test.mjs && npm run build
 
 FROM nginx:stable-alpine
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf

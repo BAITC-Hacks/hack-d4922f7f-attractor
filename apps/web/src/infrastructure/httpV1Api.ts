@@ -3,7 +3,7 @@ import type { V1Api } from "../application/ports";
 
 const configuredBaseUrl = (
   import.meta.env.VITE_API_BASE_URL
-  ?? (import.meta.env.VITE_API_PROXY === "true" ? "/api-proxy" : "")
+  ?? (import.meta.env.DEV || import.meta.env.VITE_API_PROXY === "true" ? "/api-proxy" : "")
 ).replace(/\/$/, "");
 const useFixtures = configuredBaseUrl.length === 0;
 const baseUrl = useFixtures ? "/mock-api" : configuredBaseUrl;

@@ -15,9 +15,19 @@ const initialSlots: Array<Selection | null> = [null, null, null, null, null];
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(value);
 const scoreText = (value: number) => value.toFixed(5);
 const districtGeoJsonUrl = import.meta.env.VITE_DISTRICTS_GEOJSON_URL ?? "/mock-api/astana-districts.geojson";
-const mapStyle = "https://tiles.openfreemap.org/styles/bright";
+const mapStyle: maplibregl.StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap contributors" },
+    openmaptiles: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenStreetMap contributors · OpenFreeMap" },
+  },
+  layers: [
+    { id: "map-background", type: "background", paint: { "background-color": "#e7edf0" } },
+    { id: "osm-basemap", type: "raster", source: "osm", paint: { "raster-opacity": 0.94 } },
+  ],
+};
 const normalizeDistrictId = (value: string | null | undefined) => (value ?? "").toLowerCase().replace("baykonur", "baikonur");
-const districtColors: Record<string, string> = { esil: "#247ba0", almaty: "#f18f01", saryarka: "#6a994e", baikonur: "#9b5de5", nura: "#d1495b" };
+const districtColors: Record<string, string> = { esil: "#247ba0", almaty: "#f18f01", saryarka: "#6a994e", baykonur: "#9b5de5", baikonur: "#9b5de5", nura: "#d1495b" };
 const indicatorRows = [
   { id: "esil", name: "Есиль", T1: 45, T2: 62, E1: 68, E2: 72, S1: 48, S2: 55, B1: 78, B2: 60, C1: 75, C2: 70, total: 62.99 },
   { id: "almaty", name: "Алматы", T1: 40, T2: 75, E1: 50, E2: 55, S1: 60, S2: 65, B1: 62, B2: 52, C1: 50, C2: 60, total: 57.06 },
@@ -35,6 +45,7 @@ function districtIndicatorValue(row: (typeof indicatorRows)[number], metric: str
 }
 
 export function App() {
+  const [design, setDesign] = useState<"v1" | "v2">(() => new URLSearchParams(window.location.search).get("design") === "v1" ? "v1" : "v2");
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const districtPoints = useRef<FeatureCollection | null>(null);
@@ -48,7 +59,7 @@ export function App() {
   const [mapError, setMapError] = useState("");
   const [geoJson, setGeoJson] = useState<FeatureCollection | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [layers, setLayers] = useState({ districts: true, indicator: false, measures: true, buildings: false, services: false, transport: false });
+  const [layers, setLayers] = useState({ districts: true, indicator: false, measures: true, buildings: true, services: false, transport: false });
   const [viewMode, setViewMode] = useState<"scenario" | "indicators">("scenario");
   const [selectedMetric, setSelectedMetric] = useState("total");
   const [touched, setTouched] = useState(false);
@@ -81,8 +92,8 @@ export function App() {
       container: mapContainer.current,
       style: mapStyle,
       center: [71.43, 51.13],
-      zoom: 10.1,
-      pitch: 42,
+      zoom: 12.2,
+      pitch: 50,
       bearing: -9,
       attributionControl: false,
       maxPitch: 70,
@@ -94,10 +105,14 @@ export function App() {
       try {
         const labelLayer = instance.getStyle().layers?.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"]);
         const firstLabelId = labelLayer?.id;
+        instance.addSource("city-core", { type: "geojson", data: "/maps/astana-core.geojson" });
+        instance.addLayer({ id: "core-roads", type: "line", source: "city-core", filter: ["==", ["get", "kind"], "road"], paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.5, 15, 3.5], "line-opacity": 0.95 } });
+        instance.addLayer({ id: "core-buildings", type: "fill-extrusion", source: "city-core", filter: ["==", ["get", "kind"], "building"], minzoom: 13, paint: { "fill-extrusion-color": "#a8b9c0", "fill-extrusion-height": ["coalesce", ["get", "height_m"], 8], "fill-extrusion-base": 0, "fill-extrusion-opacity": 0.8 } });
+        instance.addLayer({ id: "citywide-buildings", type: "fill-extrusion", source: "openmaptiles", "source-layer": "building", minzoom: 12, filter: ["!=", ["get", "hide_3d"], true], paint: { "fill-extrusion-color": "#6c99a6", "fill-extrusion-height": ["min", ["coalesce", ["get", "render_height"], 8], 140], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity": 0.72 } });
         if (geoJson) {
           instance.addSource("districts", { type: "geojson", data: geoJson, promoteId: "id" });
           const baseDistrictFill = ["match", ["get", "id"], ...Object.entries(districtColors).flatMap(([id, color]) => [id, color]), "#7392a7"] as unknown as maplibregl.ExpressionSpecification;
-          instance.addLayer({ id: "district-fill", type: "fill", source: "districts", paint: { "fill-color": baseDistrictFill, "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.58, ["boolean", ["feature-state", "hover"], false], 0.42, 0.23], "fill-outline-color": "#ffffff" } }, firstLabelId);
+          instance.addLayer({ id: "district-fill", type: "fill", source: "districts", paint: { "fill-color": baseDistrictFill, "fill-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.8, ["boolean", ["feature-state", "hover"], false], 0.68, 0.5], "fill-outline-color": "#ffffff" } }, firstLabelId);
           instance.addLayer({ id: "district-outline", type: "line", source: "districts", paint: { "line-color": "#2672a9", "line-width": 2, "line-opacity": 0.8 } }, firstLabelId);
           const representatives = geoJson.features.map((feature) => {
             const points: number[][] = [];
@@ -154,12 +169,6 @@ export function App() {
           instance.on("mouseenter", "district-fill", () => { instance.getCanvas().style.cursor = "pointer"; });
           instance.on("mouseleave", "district-fill", () => { instance.getCanvas().style.cursor = ""; });
         }
-        const sources = instance.getStyle().sources ?? {};
-        const sourceName = Object.keys(sources).find((key) => sources[key].type === "vector" && "url" in sources[key] && sources[key].url === "https://tiles.openfreemap.org/planet");
-        if (sourceName && !instance.getLayer("3d-buildings")) {
-          const firstSymbolLayer = instance.getStyle().layers?.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"]);
-          instance.addLayer({ id: "3d-buildings", source: sourceName, "source-layer": "building", type: "fill-extrusion", minzoom: 15, paint: { "fill-extrusion-color": "#99afbd", "fill-extrusion-height": ["coalesce", ["get", "render_height"], 8], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity": 0.72 } }, firstSymbolLayer?.id);
-        }
         setMapState("ready");
         if (!geoJson) setMapError("Подложка загружена; официальный слой границ районами не предоставлен.");
       } catch (reason) {
@@ -167,7 +176,7 @@ export function App() {
       }
     });
     instance.on("error", (event) => {
-      if (event.error) { setMapError("Нет соединения с картографической подложкой. Показана нейтральная схема без геометрии районов."); setMapState("fallback"); }
+      if (event.error) setMapError("Тайлы OSM временно недоступны. Локальные районы и объекты центра остаются на карте.");
     });
     return () => { instance.remove(); map.current = null; };
   }, [geoJson]);
@@ -177,10 +186,11 @@ export function App() {
     if (!instance || !instance.isStyleLoaded()) return;
     if (instance.getLayer("district-fill")) instance.setLayoutProperty("district-fill", "visibility", layers.districts ? "visible" : "none");
     if (instance.getLayer("district-outline")) instance.setLayoutProperty("district-outline", "visibility", layers.districts ? "visible" : "none");
-    if (instance.getLayer("3d-buildings")) instance.setLayoutProperty("3d-buildings", "visibility", (layers.buildings || layers.services) ? "visible" : "none");
+    if (instance.getLayer("core-buildings")) instance.setLayoutProperty("core-buildings", "visibility", (layers.buildings || layers.services) ? "visible" : "none");
+    if (instance.getLayer("citywide-buildings")) instance.setLayoutProperty("citywide-buildings", "visibility", layers.buildings ? "visible" : "none");
     for (const id of ["measure-point", "measure-clusters", "measure-cluster-count"]) if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", layers.measures ? "visible" : "none");
     if (instance.getLayer("district-fill")) {
-      const metricValue: Record<string, number> = Object.fromEntries(indicatorRows.map((row) => [row.id, districtIndicatorValue(row, selectedMetric, evaluation)]));
+      const metricValue: Record<string, number> = Object.fromEntries(indicatorRows.map((row) => [row.id === "baikonur" ? "baykonur" : row.id, districtIndicatorValue(row, selectedMetric, evaluation)]));
       const colorExpression = layers.indicator
         ? ["interpolate", ["linear"], ["match", ["get", "id"], ...Object.entries(metricValue).flatMap(([id, value]) => [id, value]), 50], [0, "#b42318"], [50, "#f1c453"], [100, "#23835a"]]
         : ["match", ["get", "id"], ...Object.entries(districtColors).flatMap(([id, color]) => [id, color]), "#7392a7"];
@@ -214,6 +224,15 @@ export function App() {
   const ready = selections.length === 5 && new Set(selections.map((item) => item.measureId)).size === 5;
   const overBudget = usedCost > (catalog?.budget ?? 100);
   const measures = catalog?.measures ?? [];
+
+  function chooseDesign(next: "v1" | "v2") {
+    setDesign(next);
+    const url = new URL(window.location.href);
+    if (next === "v1") url.searchParams.set("design", "v1");
+    else url.searchParams.delete("design");
+    window.history.replaceState(null, "", url);
+    window.setTimeout(() => map.current?.resize(), 0);
+  }
 
   function setSlot(index: number, next: Selection | null) {
     setSlots((current) => current.map((slot, position) => position === index ? next : slot));
@@ -258,10 +277,10 @@ export function App() {
   }
   function toggleLayer(layer: keyof typeof layers) { setLayers((value) => ({ ...value, [layer]: !value[layer] })); }
 
-  return <main className={`app-shell ${viewMode === "indicators" ? "indicator-mode" : ""}`}>
+  return <main className={`app-shell design-${design} ${viewMode === "indicators" ? "indicator-mode" : ""}`}>
     {viewMode === "indicators" && <IndicatorDashboard catalog={catalog} evaluation={evaluation} metric={selectedMetric} onMetric={setSelectedMetric} selectedDistrict={selectedDistrict} onDistrict={(id) => { setSelectedDistrict(id); setLayers((current) => ({ ...current, indicator: true })); setViewMode("scenario"); }} />}
     {viewMode === "scenario" && <ScenarioPicker onChoose={usePreset} layers={layers} onLayer={(key) => setLayers((current) => ({ ...current, [key]: !current[key] }))} metric={selectedMetric} onMetric={setSelectedMetric} />}
-    <header className="topbar"><a className="brand" href="#top"><span className="brand-mark">А</span><span>ГОРОДСКОЙ ШТАБ<small>Астана · система поддержки решений</small></span></a><nav className="main-nav"><a className="active" href="#workspace">СЦЕНАРИЙ V1</a><a href="#workspace">КАРТА ГОРОДА</a><a href="#workspace">ДАННЫЕ</a></nav><div className="topbar-meta"><span className="live-dot"/> ДЕМО <span className="meta-divider"/> V1.0</div><button className="user-chip" aria-label="Профиль пользователя">АК</button></header>
+    <header className="topbar"><a className="brand" href="#top"><span className="brand-mark">А</span><span>{design === "v2" ? "Astana Decision Twin" : "ГОРОДСКОЙ ШТАБ"}<small>Астана · система поддержки решений</small></span></a><nav className="main-nav"><a className="active" href="#workspace">Сценарий</a><a href="#workspace">Карта города</a><a href="#top" onClick={() => setViewMode("indicators")}>Показатели</a></nav><div className="design-switch" role="group" aria-label="Версия дизайна"><button type="button" aria-pressed={design === "v2"} onClick={() => chooseDesign("v2")}>Новый дизайн</button><button type="button" aria-pressed={design === "v1"} onClick={() => chooseDesign("v1")}>Классический</button></div><div className="topbar-meta"><span className="live-dot"/> {catalog ? "МОДЕЛЬ V1" : "ЗАГРУЗКА"} <span className="meta-divider"/> {design.toUpperCase()}</div></header>
     <div className="page-heading" id="top"><div><div className="breadcrumb">АСТАНА <span>/</span> УПРАВЛЕНЧЕСКИЙ СЦЕНАРИЙ</div><h1>Сценарий развития города</h1><p>Портфель из пяти мер · модель официальной оценки V1</p></div><div className="heading-tools"><div className="mode-switch" role="tablist" aria-label="Режим просмотра"><button role="tab" aria-selected={viewMode === "scenario"} className={viewMode === "scenario" ? "active" : ""} onClick={() => setViewMode("scenario")}>Сценарий</button><button role="tab" aria-selected={viewMode === "indicators"} className={viewMode === "indicators" ? "active" : ""} onClick={() => setViewMode("indicators")}>Показатели</button></div><div className="page-status"><span className="status-dot"/> {catalog ? "СНИМОК ДАННЫХ ЗАГРУЖЕН" : "ЗАГРУЗКА СНИМКА"}<small>{catalog?.snapshotId || "ОЖИДАНИЕ API"}</small></div></div></div>
     <section className="map-workspace" id="workspace"><div className="map-view"><div ref={mapContainer} className={`map-canvas ${mapState === "fallback" ? "map-degraded" : ""}`} aria-label="Карта Астаны"/>{mapState === "fallback" && <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "grid", placeContent: "center", justifyItems: "center", gap: 8, textAlign: "center", padding: 24, color: "#4b5d69", background: "#edf0f2e8" }}><div style={{ width: 36, height: 36, display: "grid", placeItems: "center", border: "1px solid #cbd5dc", borderRadius: "50%", color: "#2463a9", fontSize: 20 }}>⌖</div><strong style={{ fontSize: 11 }}>Картографическая подложка недоступна</strong><span style={{ maxWidth: 270, fontSize: 9, lineHeight: 1.5 }}>Геометрия районов не отображается без официального GeoJSON fixture.</span></div>}<div className="map-title"><span className="map-title-icon">⌖</span><div><strong>Астана</strong><small>АДМИНИСТРАТИВНЫЕ РАЙОНЫ</small></div></div><div className="map-scale"><span>0</span><i/><span>2 км</span></div><div className="map-coordinates">51°08′ С.Ш. &nbsp; 71°26′ В.Д.</div>{mapState === "loading" && <div className="map-loading"><span className="spinner"/> Подключение к картографической подложке…</div>}{(mapState === "fallback" || mapError) && <div className={`map-notice ${mapState === "fallback" ? "map-warning" : ""}`}><strong>{mapState === "fallback" ? "Карта ограничена" : "Геометрия районов не подключена"}</strong><span>{mapError || "Показана подложка без неподтверждённых границ."}</span></div>}
       <div className="map-layer-key"><span><i className="key-district"/> Районы</span><span><i className="key-city"/> Объекты города</span></div>
