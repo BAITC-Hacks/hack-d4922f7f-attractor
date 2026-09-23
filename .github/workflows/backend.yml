@@ -25,3 +25,18 @@ jobs:
       - run: python -m scripts.export_openapi --check
       - run: python -m build --wheel
       - run: python scripts/smoke_wheel.py dist/akim_simulation_engine-0.2.0-py3-none-any.whl
+  compose:
+    runs-on: ubuntu-latest
+    env:
+      AKIM_LLM_ENABLED: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose up --build -d --wait --wait-timeout 120
+      - run: docker compose exec -T api python -m scripts.demo_backend
+      - run: docker compose exec -T api python -m scripts.demo_backend --url http://web/api
+      - run: curl --fail http://localhost:8080/
+      - if: always()
+        run: docker compose logs --tail=100
+      - if: always()
+        run: docker compose down

@@ -1,0 +1,34 @@
+{
+  "selections": [
+    {
+      "measureId": "M1",
+      "districtId": "esil"
+    },
+    {
+      "measureId": "M1",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M3",
+      "districtId": "almaty"
+    },
+    {
+      "measureId": "M4",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M7",
+      "districtId": "nura"
+    },
+    {
+      "measureId": "M12",
+      "districtId": "esil"
+    }
+  ],
+  "versions": {
+    "catalogVersion": "official-v1",
+    "dataSnapshotId": "astana-v1-source-dataset",
+    "modelVersion": "official-v1",
+    "rulesVersion": "official-v1"
+  }
+}

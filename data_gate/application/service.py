@@ -254,4 +254,3 @@ def _previous_snapshot(ref: DatasetRef) -> str | None:
         return None
     index = distinct.index(ref.current)
     return distinct[index - 1] if index > 0 else None
-

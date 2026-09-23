@@ -16,8 +16,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 from importlib.resources import files
+from pathlib import Path
 from typing import Any, Sequence
 
 from data_gate.application.service import DataGateService

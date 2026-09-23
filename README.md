@@ -6,7 +6,7 @@
 
 ### Проверяемая лаборатория бюджетных решений для городского управления
 
-`Python 3.11+` · `FastAPI` · `OpenAI Responses (опционально)` · `Clean Architecture`
+`Python 3.11+` · `FastAPI` · `React + TypeScript` · `Docker Compose`
 
 [Запуск](#быстрый-старт) · [Демо](#демо-бэкенда) · [Архитектура](#архитектура) · [API](#api-first-контракты) · [Планы](#что-дальше)
 
@@ -32,7 +32,9 @@ V1 сохраняет исходные правила без изменений.
 ## Текущий статус
 
 Реализован **бэкенд V1**: API, evaluator, Data Gate, локальный поиск альтернатив,
-отчёт с evidence. Фронтенд подключается отдельно; V2 остаётся планом.
+отчёт с evidence. Фронтенд из актуального main подключён к API через адаптер;
+Compose поднимает оба слоя. V2 остаётся планом. AI и альтернативы пока доступны
+через API/Swagger, но не подключены к кнопкам текущего интерфейса.
 LLM-адаптер проверен тестовыми ответами; живой вызов провайдера в этом прогоне
 **не выполнялся**. Без ключа явно возвращается `mode: rule-based`.
 
@@ -46,6 +48,69 @@ LLM-адаптер проверен тестовыми ответами; жив�
 | API-first | OpenAPI, проверка версий, структурные ошибки | HTTP integration tests |
 
 ## Быстрый старт
+
+**Нужно:** запущенный Docker Desktop в режиме Linux containers (или Docker Engine)
+с Docker Compose v2.20+ (или v5), Git и интернет для первой сборки. Python/Node на хосте
+для этого способа не нужны. До merge используйте эту ветку:
+
+```bash
+git clone --branch fix/backend-readiness https://github.com/BAITC-Hacks/hack-d4922f7f-attractor.git
+cd hack-d4922f7f-attractor
+docker compose up --build -d --wait
+```
+
+После клонирования запуск всего проекта — **одна последняя команда**, без обязательного
+`.env` и без ключей. Compose собирает `web` (React + nginx) и `api` (FastAPI +
+engine + Data Gate); ждёт healthcheck. Отдельной БД сейчас нет.
+
+| Куда открыть | Что находится |
+| --- | --- |
+| [localhost:8080](http://localhost:8080) | Веб-интерфейс с живым API, не mock-расчётом |
+| [localhost:8000/docs](http://localhost:8000/docs) | Swagger: расчёт, альтернативы, анализ и Data Gate |
+| [localhost:8000/health](http://localhost:8000/health) | Готовность бэкенда и версии снимка |
+
+Проверьте сквозной сценарий (каталог → расчёт → альтернативы → отчёт):
+
+```bash
+docker compose exec -T api python -m scripts.demo_backend
+docker compose exec -T api python -m scripts.demo_backend --url http://web/api
+```
+
+Вторая команда проверяет также nginx-прокси, которым пользуется браузер.
+Ожидается `score: 56.54307`, `cost: 95`, `analysisMode: rule-based`.
+
+<details>
+<summary>Настройки, логи, остановка и повторный запуск</summary>
+
+Необязательная настройка: скопируйте [.env.example](.env.example) в `.env`
+(PowerShell: `Copy-Item .env.example .env`; Linux/macOS: `cp .env.example .env`).
+Если файл уже есть, отредактируйте его — не перезаписывайте секреты.
+
+`AKIM_WEB_PORT` и `AKIM_API_PORT` меняют порты хоста (по умолчанию 8080 и 8000).
+Например, если порт занят, задайте в `.env` `AKIM_WEB_PORT=8081` или `AKIM_API_PORT=8001`.
+Внутри контейнеров адреса не меняются. После изменения `.env` повторите команду запуска.
+Compose подставляет параметры из `.env`; переменные оболочки имеют приоритет.
+
+```bash
+docker compose ps
+docker compose logs --tail=100 api web
+docker compose down
+docker compose up --build -d --wait
+```
+
+`down` останавливает контейнеры, **но сохраняет данные** в named volume `data-gate`.
+Не добавляйте `-v`, если снимки/импорты нужны: `docker compose down -v` удаляет их.
+Не запускайте несколько API workers или параллельный CLI writer на этом volume.
+API работает от непривилегированного пользователя; наружу порты привязаны только к localhost.
+
+Если Docker недоступен, сначала запустите Docker Desktop и проверьте `docker version`.
+Если healthcheck не проходит, посмотрите `docker compose logs api`.
+Подложка карты загружается из внешнего сервиса и требует интернета; расчёт выполняет
+локальный API. Первая сборка скачивает образы, npm- и Python-зависимости.
+
+</details>
+
+### Запуск без Docker
 
 Нужно: Python **3.11+**, доступ к PyPI для установки. БД и ключ LLM для demo не нужны.
 Из корня клонированного [репозитория](https://github.com/BAITC-Hacks/hack-d4922f7f-attractor),
@@ -73,6 +138,12 @@ python3 -m venv .venv
 [Swagger UI](http://127.0.0.1:8000/docs) · [Каталог](http://127.0.0.1:8000/catalog).
 API сам импортирует и публикует официальный исходник. Хранилище:
 `var/data-gate` относительно текущего каталога. Запускать **один worker**.
+Это запуск только API. Для локальной разработки интерфейса дополнительно нужны
+Node.js 22 и npm: в `apps/web` выполните `npm ci` и запустите `npm run dev` с
+`VITE_API_PROXY=true` в окружении. Без этого переключателя dev UI использует fixtures.
+В Compose нужный адрес `/api` встраивается автоматически при сборке.
+Основная точка входа — `services.api.app:app`; старый `api.main` оставлен как legacy,
+Compose его не запускает.
 
 ## Демо бэкенда
 
@@ -135,12 +206,12 @@ Score = 0.7 × Davg + 0.3 × min(Ddistrict) − Ncritical
 
 ## Проверенные результаты
 
-Локально: Windows, Python 3.12.10. CI для Python 3.11/3.12 добавлен; удалённый
-результат CI пока не подтверждён.
+Локально: Windows/Python 3.12.10; проверены Linux-контейнеры через Docker Desktop.
+CI для Python 3.11/3.12 и Compose добавлен; удалённый результат пока не подтверждён.
 
 | Проверка | Результат |
 | --- | --- |
-| Автотесты | **102 проходят**: engine, Data Gate, HTTP, search, AI policy |
+| Автотесты | **109 Python + 3 Node**: engine, Data Gate, HTTP, search, AI policy и UI adapter |
 | База без мер (диагностика) | **52.55768** |
 | Контрольный портфель за 95 | **56.54307** |
 | Декомпозиция прироста | **+0.85064 +1.13475 +2 = +3.98539** |
@@ -148,6 +219,7 @@ Score = 0.7 × Davg + 0.3 × min(Ddistrict) − Ncritical
 | Официальный импорт | **0 critical / 0 warning** |
 | Установка | `pip install`, сборка wheel, ресурсы и HTTP smoke вне checkout |
 | Статические проверки | Ruff, `pip check`, синхронизация OpenAPI |
+| Docker Compose | API и web healthy; demo через API и nginx; данные сохраняются при пересоздании контейнеров |
 
 ## API-first контракты
 
@@ -177,15 +249,17 @@ LLM выбирает/упорядочивает готовые evidence IDs. С�
 
 | Переменная | Назначение |
 | --- | --- |
-| `AKIM_DATA_GATE_DIR` | Путь хранилища |
+| `AKIM_WEB_PORT`, `AKIM_API_PORT` | Порты Compose на localhost: по умолчанию 8080 и 8000 |
+| `AKIM_DATA_GATE_DIR` | Путь при прямом Python-запуске; Compose фиксирует путь persistent volume |
 | `AKIM_CORS_ORIGINS` | Разрешённые адреса UI через запятую; по умолчанию закрыто |
 | `AKIM_ADMIN_TOKEN` | Bearer token для Data Gate; без него HTTP-доступ закрыт |
 | `AKIM_LLM_ENABLED=1` | Явное включение платных запросов |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Ключ и доступная Responses-модель с tools/structured outputs |
 | `AKIM_LLM_MAX_ANALYSES` | Анализов на процесс: по умолчанию 10, максимум 100 |
 
-[.env.example](.env.example) — пример, **не загружается автоматически**. Экспортируйте
-переменные в окружение процесса. Ключи не коммитьте. Лимиты LLM: один одновременный
+[.env.example](.env.example) — шаблон для необязательного `.env`. **Compose читает
+`.env` автоматически**, прямой Python — нет (экспортируйте переменные в оболочку).
+Ключи не коммитьте: `.env` исключён из Git и Docker build context. Лимиты LLM: один одновременный
 анализ, deadline 20 секунд, ≤3 вызовов включая repair, ≤800 output tokens/вызов;
 SDK retries отключены. Это не денежный лимит: настройте бюджет проекта провайдера.
 
@@ -213,13 +287,16 @@ packages/contracts/ domain JSON Schema и генерируемый OpenAPI
 data/               исходник и эталонный fixture (входят в wheel)
 tests/              golden, regression, integration, search, AI contract tests
 scripts/            HTTP demo, OpenAPI export, wheel smoke
+apps/web/           React UI и адаптер HTTP-контрактов
+compose.yaml        API + web + постоянный volume, healthchecks
+deploy/             nginx reverse proxy для web → API
 docs/               спецификации, аудит, evidence
 assets/             логотип и будущие изображения README
 ```
 
 ## Что дальше
 
-**Перед защитой:** согласовать UI-контракт, записать демо, проверить живую LLM-модель
+**Перед защитой:** подключить кнопки AI/альтернатив, записать демо, проверить живую LLM-модель
 и сравнить пользу с rule-based baseline, получить зелёный CI. Сроки не зафиксированы.
 
 **Следующий этап:** транзакционный PostgreSQL-адаптер, роли, наблюдаемость и замеры
@@ -232,11 +309,16 @@ adapters и ансамбли V2. Масштабирование обосновы
 
 - V1 — синтетическое задание, не прогноз и не доказательство причинного эффекта.
 - Поиск локальный: глобальный максимум не заявляется.
-- Live LLM, UI, пользовательские исследования и V2 не подтверждены этим прогоном.
+- Live LLM, пользовательские исследования и V2 не подтверждены этим прогоном.
+  UI собирается и связан с API; это ещё не полная UX-приёмка.
 - Файловый Data Gate: один процесс-писатель; не запускайте CLI/API одновременно
   на одном хранилище. Lock API не заменяет межпроцессные транзакции.
-- Нет готового публичного production deployment, RBAC, постоянного бюджета LLM,
-  нагрузочного отчёта или проверенного контейнерного запуска.
+- Нет готового публичного production deployment, RBAC, постоянного бюджета LLM
+  или нагрузочного отчёта. Compose — локальный demo-профиль, не production.
+- `npm audit` обнаруживает critical XSS в пришедшем из main `maplibre-gl@5.24.0`
+  ([GHSA-jrc7-96c5-q579](https://github.com/maplibre/maplibre-gl-js/security/advisories/GHSA-jrc7-96c5-q579)).
+  Исправление начинается с 6.4.1; перед публичным показом нужен проверенный major upgrade.
+  Внешний стиль карты использует затронутый attribution-путь; localhost не устраняет XSS.
 - Отдельная лицензия, состав команды и видео защиты пока не опубликованы.
 
 ## Документация

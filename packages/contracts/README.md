@@ -14,8 +14,10 @@ HTTP-ответ V1 расширяет доменный результат пол
 
 ## Согласование фронтенда
 
-Проверялся черновой `origin/codex/aygerim-frontend`; он не менялся в backend-задаче.
-Его TypeScript declarations/HTTP normalizer пока не совпадают с контрактом `main`.
+Фронтенд из `main@8f5103d` включён в ветку. HTTP normalizer адаптирован к каноническим
+maps/decomposition движка, сохранена совместимость legacy/mock-ответов.
+Три Node-теста проверяют преобразование и отправку версий; Compose использует `/api`.
+Статические TypeScript declarations старого контракта пока отличаются от HTTP wire format:
 
 | Поле | Канонический backend | Что согласовать в UI |
 |---|---|---|
@@ -27,6 +29,6 @@ HTTP-ответ V1 расширяет доменный результат пол
 | Каталог показателей | `code`, `name`, `direction`, `scale`; веса в `weights` | Явно адаптировать `code` → UI `id` |
 | Альтернативы | `{results: [{selections, evaluation, replacements}], ...}` | Использовать тот же evaluator presenter |
 
-Это задача адаптера/генерации клиента, а не повод менять формулу V1. Перед merge
-фронтенда нужен контрактный тест реального HTTP-клиента против API; текущий backend
-suite не доказывает, что черновой фронтенд уже совместим.
+Различия преобразуются в `apps/web/src/infrastructure/httpV1Api.ts` без изменения формулы.
+Проверка: из `apps/web` выполните `node --test src/infrastructure/httpV1Api.test.mjs`
+после `npm ci`. Полная UX-приёмка и генерация единого TypeScript-клиента остаются отдельно.

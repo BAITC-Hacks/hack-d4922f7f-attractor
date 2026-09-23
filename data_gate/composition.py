@@ -23,13 +23,11 @@ from data_gate.infrastructure.memory import (
 )
 from data_gate.infrastructure.parsers import ALL_PARSERS
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_STORE = Path("var") / "data-gate"
 STORE_ENV = "AKIM_DATA_GATE_DIR"
 
 
 def default_store_dir() -> Path:
-    return Path(os.environ.get(STORE_ENV) or DEFAULT_STORE)
+    return Path(os.environ.get(STORE_ENV) or Path.cwd() / "var" / "data-gate")
 
 
 def create_file_gate(root: Path | None = None, clock: Clock | None = None) -> DataGateService:

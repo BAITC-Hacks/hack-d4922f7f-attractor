@@ -1,0 +1,53 @@
+name: akim
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    restart: unless-stopped
+    environment:
+      AKIM_DATA_GATE_DIR: /var/lib/akim/data-gate
+      AKIM_CORS_ORIGINS: ${AKIM_CORS_ORIGINS:-}
+      AKIM_ADMIN_TOKEN: ${AKIM_ADMIN_TOKEN:-}
+      AKIM_LLM_ENABLED: ${AKIM_LLM_ENABLED:-0}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      AKIM_LLM_MAX_ANALYSES: ${AKIM_LLM_MAX_ANALYSES:-10}
+    ports:
+      - "127.0.0.1:${AKIM_API_PORT:-8000}:8000"
+    volumes:
+      - data-gate:/var/lib/akim/data-gate
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "127.0.0.1:${AKIM_WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  data-gate:
