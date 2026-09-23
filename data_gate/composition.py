@@ -24,7 +24,7 @@ from data_gate.infrastructure.memory import (
 from data_gate.infrastructure.parsers import ALL_PARSERS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_STORE = REPO_ROOT / "var" / "data-gate"
+DEFAULT_STORE = Path("var") / "data-gate"
 STORE_ENV = "AKIM_DATA_GATE_DIR"
 
 

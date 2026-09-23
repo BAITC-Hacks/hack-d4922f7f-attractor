@@ -9,6 +9,7 @@ observations для сверки, а не в модель.
 from __future__ import annotations
 
 import re
+from math import isfinite
 from typing import Any
 
 from data_gate.application.ports import ParsedSource
@@ -131,6 +132,8 @@ def _num(value: str, what: str) -> float:
     if not _NUMBER.match(value):
         raise SourceParseError(f"{what}: «{value}» не число")
     number = float(cleaned)
+    if not isfinite(number):
+        raise SourceParseError(f"{what}: число вне допустимого диапазона")
     return int(number) if number.is_integer() else number
 
 
@@ -208,10 +211,17 @@ def _measures(lines: list[str]) -> list[dict[str, Any]]:
             "direction": DIRECTIONS[direction],
             "scope": SCOPES[scope],
             "cost": _num(cost, f"{mid}: стоимость"),
-            "lagQuarters": int(_num(lag, f"{mid}: лаг")),
+            "lagQuarters": _integer(lag, f"{mid}: лаг"),
             "effects": parsed,
         })
     return measures
+
+
+def _integer(value: str, what: str) -> int:
+    number = _num(value, what)
+    if not float(number).is_integer():
+        raise SourceParseError(f"{what}: ожидается целое число")
+    return int(number)
 
 
 def _synergies(lines: list[str]) -> list[dict[str, Any]]:

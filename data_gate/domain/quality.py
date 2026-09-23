@@ -55,6 +55,13 @@ def _check_city_v1(payload: Mapping[str, Any], observations: Mapping[str, Any]) 
         return issues  # дальше структура не гарантирована
 
     horizon = payload["horizonQuarters"]
+    if not 0 <= payload["criticalThreshold"] <= 100:
+        crit("out_of_range", "criticalThreshold", "Порог должен быть в [0, 100]")
+    if payload["criticalPenalty"] < 0:
+        crit("out_of_range", "criticalPenalty", "Штраф не может быть отрицательным")
+    for key in ("districts", "measures", "weights"):
+        if not payload[key]:
+            crit("missing_value", key, "Коллекция не может быть пустой")
     for key in ("horizonQuarters", "budget", "requiredSelectionCount", "maxMeasuresPerDirection"):
         if not payload[key] > 0:
             crit("out_of_range", key, f"{key} должен быть положительным")
@@ -63,12 +70,13 @@ def _check_city_v1(payload: Mapping[str, Any], observations: Mapping[str, Any]) 
     indicator_codes = set(weights)
     if not all(_number(v) and v >= 0 for v in weights.values()):
         crit("invalid_weight", "weights", "Веса должны быть неотрицательными числами")
-    elif not isclose(fsum(weights.values()), 1.0, abs_tol=1e-9):
-        crit("weights_sum", "weights", f"Сумма весов {fsum(weights.values())} ≠ 1")
+    elif not isclose(sum(weights.values()), 1.0, abs_tol=1e-9):
+        crit("weights_sum", "weights", f"Сумма весов {sum(weights.values())} ≠ 1")
 
     catalog = payload.get("indicatorCatalog")
     if isinstance(catalog, list):
-        codes = [item.get("code") for item in catalog if isinstance(item, dict)]
+        codes = [item.get("code") for item in catalog
+                 if isinstance(item, dict) and isinstance(item.get("code"), str)]
         if set(codes) != indicator_codes:
             crit("catalog_mismatch", "indicatorCatalog", "Каталог показателей не совпадает с весами")
 
@@ -81,6 +89,8 @@ def _check_city_v1(payload: Mapping[str, Any], observations: Mapping[str, Any]) 
         if not isinstance(district, dict):
             crit("invalid_type", path, "Район должен быть объектом")
             continue
+        if not isinstance(district.get("name"), str) or not district["name"].strip():
+            crit("missing_value", f"{path}.name", "Нет названия района")
         share = district.get("populationShare")
         if share is None:
             crit("missing_value", f"{path}.populationShare", "Доля населения не указана (пропуск ≠ 0)")
@@ -114,9 +124,9 @@ def _check_city_v1(payload: Mapping[str, Any], observations: Mapping[str, Any]) 
         if not isinstance(measure, dict):
             crit("invalid_type", path, "Мера должна быть объектом")
             continue
-        if measure.get("scope") not in VALID_SCOPES:
+        if not isinstance(measure.get("scope"), str) or measure["scope"] not in VALID_SCOPES:
             crit("invalid_enum", f"{path}.scope", "scope: city или district")
-        if measure.get("direction") not in VALID_DIRECTIONS:
+        if not isinstance(measure.get("direction"), str) or measure["direction"] not in VALID_DIRECTIONS:
             crit("invalid_enum", f"{path}.direction", f"Неизвестное направление {measure.get('direction')}")
         cost = measure.get("cost")
         if not _number(cost) or cost < 0:
@@ -135,18 +145,30 @@ def _check_city_v1(payload: Mapping[str, Any], observations: Mapping[str, Any]) 
                 crit("invalid_type", f"{path}.effects.{code}", "Эффект должен быть числом")
 
     # ссылочная целостность
+    synergy_keys = set()
     for index, synergy in enumerate(payload["synergies"]):
         path = f"synergies[{index}]"
         pair = synergy.get("measureIds", []) if isinstance(synergy, dict) else []
-        if not isinstance(pair, list) or len(pair) != 2 or not set(pair) <= measure_ids:
+        if not _valid_pair(pair, measure_ids):
             crit("broken_reference", f"{path}.measureIds", "Синергия ссылается на неизвестные меры")
         elif synergy.get("targetMeasureId") not in pair:
             crit("broken_reference", f"{path}.targetMeasureId", "Цель синергии не входит в пару")
-        if isinstance(synergy, dict) and synergy.get("indicator") not in indicator_codes:
+        if isinstance(synergy, dict) and (
+            not isinstance(synergy.get("indicator"), str)
+            or synergy["indicator"] not in indicator_codes
+        ):
             crit("unknown_indicator", f"{path}.indicator", "Синергия на неизвестный показатель")
+        if not isinstance(synergy, dict) or not _number(synergy.get("bonus")):
+            crit("invalid_type", f"{path}.bonus", "Бонус должен быть конечным числом")
+        if (_valid_pair(pair, measure_ids) and isinstance(synergy.get("targetMeasureId"), str)
+                and isinstance(synergy.get("indicator"), str)):
+            key = (tuple(sorted(pair)), synergy["targetMeasureId"], synergy["indicator"])
+            if key in synergy_keys:
+                crit("duplicate_synergy", path, "Повтор синергии удваивает эффект")
+            synergy_keys.add(key)
     for key in ("globalConflicts", "districtConflicts"):
         for index, pair in enumerate(payload[key]):
-            if not isinstance(pair, list) or len(pair) != 2 or not set(pair) <= measure_ids:
+            if not _valid_pair(pair, measure_ids):
                 crit("broken_reference", f"{key}[{index}]", "Конфликт ссылается на неизвестные меры")
 
     if any(issue.severity is Severity.CRITICAL for issue in issues):
@@ -206,8 +228,9 @@ def _check_territory_geojson(payload: Mapping[str, Any], observations: Mapping[s
         return issues
     crs = payload.get("crs")
     if crs is not None:
-        name = (crs.get("properties") or {}).get("name") if isinstance(crs, dict) else None
-        if name not in _WGS84_NAMES:
+        properties = crs.get("properties") if isinstance(crs, dict) else None
+        name = properties.get("name") if isinstance(properties, dict) else None
+        if not isinstance(name, str) or name not in _WGS84_NAMES:
             crit("unsupported_crs", "crs", f"CRS {name} не WGS84; перепроецируйте до импорта (RFC 7946)")
     features = payload.get("features")
     if not isinstance(features, list) or not features:
@@ -229,15 +252,23 @@ def _check_territory_geojson(payload: Mapping[str, Any], observations: Mapping[s
         else:
             seen.add(str(feature_id))
         geometry = feature.get("geometry")
-        if not isinstance(geometry, dict) or geometry.get("type") not in _GEOMETRY_TYPES:
+        if (not isinstance(geometry, dict) or not isinstance(geometry.get("type"), str)
+                or geometry["type"] not in _GEOMETRY_TYPES):
             crit("invalid_geometry", f"{path}.geometry", "Неподдерживаемая или пустая геометрия")
             continue
         problem = _geometry_problem(geometry["type"], geometry.get("coordinates"))
         if problem:
             crit("invalid_geometry", f"{path}.geometry", problem)
-        properties = feature.get("properties") or {}
+        properties = feature.get("properties")
+        properties = {} if properties is None else properties
+        if not isinstance(properties, dict):
+            crit("invalid_type", f"{path}.properties", "properties должен быть объектом")
+            continue
         district_id = properties.get("districtId")
-        if known_districts and district_id is not None and district_id not in known_districts:
+        if district_id is not None and (
+            not isinstance(district_id, str)
+            or (known_districts and district_id not in known_districts)
+        ):
             crit("broken_reference", f"{path}.properties.districtId", f"Неизвестный район {district_id}")
         if not properties.get("layer"):
             warn("missing_layer", f"{path}.properties.layer", "Не указан слой (buildings/roads/…) — объект не попадёт в фильтры")
@@ -257,14 +288,14 @@ def _geometry_problem(kind: str, coords: Any) -> str | None:
     def polygon(p: Any) -> bool:
         return isinstance(p, list) and len(p) >= 1 and all(ring(r) for r in p)
 
-    def line(l: Any) -> bool:
-        return isinstance(l, list) and len(l) >= 2 and all(position(p) for p in l)
+    def line(points: Any) -> bool:
+        return isinstance(points, list) and len(points) >= 2 and all(position(p) for p in points)
 
     ok = {
         "Point": lambda c: position(c),
         "MultiPoint": lambda c: isinstance(c, list) and bool(c) and all(position(p) for p in c),
         "LineString": line,
-        "MultiLineString": lambda c: isinstance(c, list) and bool(c) and all(line(l) for l in c),
+        "MultiLineString": lambda c: isinstance(c, list) and bool(c) and all(line(points) for points in c),
         "Polygon": polygon,
         "MultiPolygon": lambda c: isinstance(c, list) and bool(c) and all(polygon(p) for p in c),
     }[kind](coords)
@@ -287,12 +318,21 @@ def _adder(issues: Issues, severity: Severity) -> Callable[[str, str, str], None
 
 
 def _number(value: Any) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+    try:
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+    except OverflowError:
+        return False
+
+
+def _valid_pair(pair: Any, known_ids: set[str]) -> bool:
+    return (isinstance(pair, list) and len(pair) == 2
+            and all(isinstance(item, str) for item in pair)
+            and len(set(pair)) == 2 and set(pair) <= known_ids)
 
 
 def _is(value: Any, kind: Any) -> bool:
     if kind is int or kind == (int, float):
-        return _number(value) and (kind != int or isinstance(value, int))
+        return _number(value) and (kind is not int or isinstance(value, int))
     return isinstance(value, kind)
 
 

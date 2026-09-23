@@ -17,14 +17,15 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from importlib.resources import files
 from typing import Any, Sequence
 
 from data_gate.application.service import DataGateService
-from data_gate.composition import REPO_ROOT, create_file_gate, default_store_dir
+from data_gate.composition import create_file_gate, default_store_dir
 from data_gate.domain.errors import DataGateError
 from data_gate.domain.model import PassportInput, SourceType
 
-OFFICIAL_SOURCE = REPO_ROOT / "data" / "source-dataset.ru.txt"
+OFFICIAL_SOURCE = files("data").joinpath("source-dataset.ru.txt")
 OFFICIAL_PASSPORT = PassportInput(
     dataset_id="official-v1",
     source_type=SourceType.SYNTHETIC,
@@ -52,9 +53,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _bootstrap(gate: DataGateService, args: argparse.Namespace) -> dict[str, Any]:
-    record = gate.create_import(Path(args.source).read_bytes(), "source-text-v1", OFFICIAL_PASSPORT)
+    content = Path(args.source).read_bytes() if args.source else OFFICIAL_SOURCE.read_bytes()
+    record = gate.create_import(content, "source-text-v1", OFFICIAL_PASSPORT)
     snapshot = gate.publish(record.id)
-    out = Path(args.out) if args.out else default_store_dir() / "exports" / "official-v1.snapshot.json"
+    store = Path(args.store) if args.store else default_store_dir()
+    out = Path(args.out) if args.out else store / "exports" / "official-v1.snapshot.json"
     _write_payload(out, snapshot.payload)
     return {
         "importId": record.id,
@@ -125,7 +128,7 @@ def _parser() -> argparse.ArgumentParser:
     sub = root.add_subparsers(required=True, metavar="command")
 
     p = sub.add_parser("bootstrap", help="исходник ТЗ → официальный снимок official-v1")
-    p.add_argument("--source", default=str(OFFICIAL_SOURCE))
+    p.add_argument("--source", help="по умолчанию исходник из установленного пакета")
     p.add_argument("--out", help="куда экспортировать payload для движка")
     p.set_defaults(handler=_bootstrap)
 

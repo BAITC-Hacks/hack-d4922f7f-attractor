@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
-from math import isclose
+from math import isclose, isfinite
 from pathlib import Path
+from typing import Any, Mapping
 
 from engine.v1.domain.model import (
     District,
@@ -21,6 +22,15 @@ class SnapshotFormatError(ValueError):
 def load_snapshot(path: Path) -> SimulationSnapshot:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
+    except (ValueError, OSError) as error:
+        raise SnapshotFormatError(f"Invalid snapshot {path}: {error}") from error
+    return snapshot_from_payload(raw)
+
+
+def snapshot_from_payload(raw: Mapping[str, Any]) -> SimulationSnapshot:
+    """Boundary adapter shared by file loading and published Data Gate snapshots."""
+    try:
+        _validate_input(raw)
         snapshot = SimulationSnapshot(
             id=raw["id"],
             rules_version=raw["rulesVersion"],
@@ -68,11 +78,62 @@ def load_snapshot(path: Path) -> SimulationSnapshot:
                 for measure_ids in raw["districtConflicts"]
             ),
         )
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
-        raise SnapshotFormatError(f"Invalid snapshot {path}: {error}") from error
+        _validate_snapshot(snapshot)
+    except (KeyError, TypeError, ValueError, AttributeError, OverflowError) as error:
+        raise SnapshotFormatError(f"Invalid snapshot: {error}") from error
 
-    _validate_snapshot(snapshot)
     return snapshot
+
+
+def _validate_input(raw: Mapping[str, Any]) -> None:
+    def number(value: Any) -> None:
+        if type(value) not in (int, float) or not isfinite(value):
+            raise SnapshotFormatError("Expected a finite number (not bool or string)")
+
+    for key in ("horizonQuarters", "requiredSelectionCount", "maxMeasuresPerDirection"):
+        if type(raw[key]) is not int or raw[key] <= 0:
+            raise SnapshotFormatError(f"{key} must be a positive integer")
+    for key in ("budget", "criticalThreshold", "criticalPenalty"):
+        number(raw[key])
+    if raw["budget"] <= 0 or raw["criticalPenalty"] < 0 or not 0 <= raw["criticalThreshold"] <= 100:
+        raise SnapshotFormatError("Invalid budget, threshold or penalty")
+    for key in ("id", "rulesVersion"):
+        if not isinstance(raw[key], str) or not raw[key].strip():
+            raise SnapshotFormatError(f"{key} must be a nonempty string")
+    if not raw["weights"] or not raw["districts"] or not raw["measures"]:
+        raise SnapshotFormatError("Empty snapshot collections")
+    for code, value in raw["weights"].items():
+        if not isinstance(code, str) or not code:
+            raise SnapshotFormatError("Invalid indicator ID")
+        number(value)
+        if value < 0:
+            raise SnapshotFormatError("Negative weight")
+    for collection in ("districts", "measures"):
+        for item in raw[collection]:
+            if not isinstance(item["id"], str) or not item["id"]:
+                raise SnapshotFormatError("Invalid entity ID")
+            values = item["indicators"] if collection == "districts" else item["effects"]
+            for value in values.values():
+                number(value)
+            if collection == "districts":
+                number(item["populationShare"])
+                if not 0 < item["populationShare"] <= 1:
+                    raise SnapshotFormatError("Invalid population share")
+            else:
+                number(item["cost"])
+                if type(item["lagQuarters"]) is not int:
+                    raise SnapshotFormatError("Lag must be integer")
+                if item["direction"] not in ("transport", "environment", "social", "safety", "services"):
+                    raise SnapshotFormatError("Unknown direction")
+    for item in raw["synergies"]:
+        number(item["bonus"])
+    pairs = [item["measureIds"] for item in raw["synergies"]]
+    pairs += list(raw["globalConflicts"]) + list(raw["districtConflicts"])
+    for pair in pairs:
+        if not isinstance(pair, list) or len(pair) != 2 or not all(isinstance(x, str) for x in pair):
+            raise SnapshotFormatError("Expected a pair of measure IDs")
+        if pair[0] == pair[1]:
+            raise SnapshotFormatError("Repeated ID in measure pair")
 
 
 def _validate_snapshot(snapshot: SimulationSnapshot) -> None:
@@ -116,7 +177,12 @@ def _validate_snapshot(snapshot: SimulationSnapshot) -> None:
         if not set(measure.effects) <= indicators:
             raise SnapshotFormatError(f"measure {measure.id} has unknown indicator")
 
+    synergy_keys = set()
     for synergy in snapshot.synergies:
+        key = (synergy.measure_ids, synergy.target_measure_id, synergy.indicator)
+        if key in synergy_keys:
+            raise SnapshotFormatError("Duplicate synergy")
+        synergy_keys.add(key)
         if not synergy.measure_ids <= known_measures:
             raise SnapshotFormatError("synergy references unknown measure")
         if synergy.target_measure_id not in synergy.measure_ids:

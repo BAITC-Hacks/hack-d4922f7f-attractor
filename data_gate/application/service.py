@@ -9,7 +9,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable, Mapping
+from dataclasses import asdict
+
+from typing import Any, Iterable
 
 from data_gate.application.ports import (
     Clock,
@@ -74,7 +76,7 @@ class DataGateService:
     ) -> ImportRecord:
         """raw → проверка → staging → нормализация → quality report.
 
-        Идемпотентно: тот же файл, формат и набор дают тот же import id без дубликатов.
+        Идемпотентно: те же байты, формат, паспорт и версия преобразования дают тот же import id.
         """
         parser = self._parsers.get(source_format)
         if parser is None:
@@ -83,7 +85,11 @@ class DataGateService:
                 field="format",
             )
         raw_checksum = sha256_bytes(content)
-        import_id = f"imp-{passport.dataset_id}-{source_format}-{raw_checksum[:16]}"
+        identity = payload_checksum({
+            "raw": raw_checksum, "format": source_format,
+            "passport": asdict(passport), "transform": TRANSFORM_VERSION,
+        })
+        import_id = f"imp-{passport.dataset_id}-{source_format}-{identity[:16]}"
         existing = self._imports.get(import_id)
         if existing is not None:
             return existing
@@ -91,7 +97,7 @@ class DataGateService:
         self._raw.put(raw_checksum, content)  # сырой слой хранится до любой проверки
         parsed = parser.parse(content)
         issues = check_payload(parsed.schema, parsed.payload, parsed.observations)
-        report = QualityReport(id=f"qr-{raw_checksum[:16]}-{source_format}", issues=issues)
+        report = QualityReport(id=f"qr-{identity[:16]}-{source_format}", issues=issues)
         record = ImportRecord(
             id=import_id,
             status=ImportStatus.REJECTED if report.blocks_publication else ImportStatus.READY,
@@ -162,7 +168,11 @@ class DataGateService:
             )
 
         dataset_id = record.passport.input.dataset_id
-        snapshot_id = f"{dataset_id}--{record.passport.payload_checksum[:12]}"
+        identity = payload_checksum({
+            "payload": record.passport.payload_checksum,
+            "passport": record.passport.to_api_dict(), "acceptedWarnings": accepted,
+        })
+        snapshot_id = f"{dataset_id}--{identity[:16]}"
         snapshot = self._snapshots.get(snapshot_id)
         if snapshot is None:
             snapshot = SnapshotRecord(

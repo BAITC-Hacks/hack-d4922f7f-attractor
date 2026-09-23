@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
@@ -43,14 +44,18 @@ class FileStore:
             ignore.write_text("*\n", encoding="utf-8")
 
     def path(self, kind: str, name: str, suffix: str = ".json") -> Path:
-        if not _SAFE_NAME.match(name):
+        if not isinstance(name, str) or not _SAFE_NAME.fullmatch(name):
             raise DataGateError(f"Недопустимое имя объекта хранилища: {name!r}")
         return self.root / kind / f"{name}{suffix}"
 
     def write_bytes(self, path: Path, data: bytes) -> None:
-        tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-        tmp.write_bytes(data)
-        os.replace(tmp, path)
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=f".{path.name}.", delete=False) as file:
+            tmp = Path(file.name)
+            file.write(data)
+        try:
+            os.replace(tmp, path)
+        finally:
+            tmp.unlink(missing_ok=True)
 
     def write_json(self, path: Path, doc: Any) -> None:
         text = json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True) + "\n"

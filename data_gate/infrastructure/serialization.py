@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
+from data_gate.domain.canonical import payload_checksum
+from data_gate.domain.errors import ImmutabilityViolation
+
 from data_gate.domain.model import (
     DatasetRef,
     FieldMapping,
@@ -59,6 +62,8 @@ def import_to_doc(record: ImportRecord) -> dict[str, Any]:
 
 
 def import_from_doc(doc: Mapping[str, Any]) -> ImportRecord:
+    if payload_checksum(doc["payload"]) != doc["passport"]["checksum"]:
+        raise ImmutabilityViolation("Checksum staging-импорта не совпадает")
     report = doc["report"]
     return ImportRecord(
         id=doc["id"],
@@ -84,6 +89,8 @@ def snapshot_to_doc(record: SnapshotRecord) -> dict[str, Any]:
 
 def snapshot_from_doc(doc: Mapping[str, Any]) -> SnapshotRecord:
     manifest = doc["manifest"]
+    if payload_checksum(doc["payload"]) != manifest["passport"]["checksum"]:
+        raise ImmutabilityViolation("Checksum опубликованного снимка не совпадает")
     return SnapshotRecord(
         id=manifest["id"],
         dataset_id=manifest["datasetId"],

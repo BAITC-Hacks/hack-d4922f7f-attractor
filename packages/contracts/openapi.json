@@ -1,0 +1,1429 @@
+{
+  "components": {
+    "schemas": {
+      "AlternativeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "evaluation": {
+            "$ref": "#/components/schemas/EvaluationResponse"
+          },
+          "replacements": {
+            "title": "Replacements",
+            "type": "integer"
+          },
+          "selections": {
+            "items": {
+              "$ref": "#/components/schemas/SelectionInput"
+            },
+            "title": "Selections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "selections",
+          "evaluation",
+          "replacements"
+        ],
+        "title": "AlternativeResponse",
+        "type": "object"
+      },
+      "AlternativesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "constraints": {
+            "$ref": "#/components/schemas/Constraints"
+          },
+          "selections": {
+            "items": {
+              "$ref": "#/components/schemas/SelectionInput"
+            },
+            "maxItems": 100,
+            "title": "Selections",
+            "type": "array"
+          },
+          "versions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Versions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "selections"
+        ],
+        "title": "AlternativesRequest",
+        "type": "object"
+      },
+      "AnalysisResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "$ref": "#/components/schemas/ClaimResponse"
+            },
+            "title": "Claims",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceResponse"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "evidenceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidenceids",
+            "type": "array"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueResponse"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "rule-based",
+              "llm"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "policyVersion": {
+            "title": "Policyversion",
+            "type": "string"
+          },
+          "proposals": {
+            "items": {
+              "$ref": "#/components/schemas/ProposalResponse"
+            },
+            "title": "Proposals",
+            "type": "array"
+          },
+          "sections": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Sections",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/Versions"
+          }
+        },
+        "required": [
+          "mode",
+          "status",
+          "summary",
+          "claims",
+          "evidenceIds",
+          "evidence",
+          "proposals",
+          "limitations",
+          "issues",
+          "policyVersion",
+          "versions"
+        ],
+        "title": "AnalysisResponse",
+        "type": "object"
+      },
+      "ClaimResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregation": {
+            "title": "Aggregation",
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "summary",
+              "strengths",
+              "risks",
+              "consequences",
+              "proposals"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "districtId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Districtid"
+          },
+          "evidenceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidenceids",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "calculation",
+            "title": "Kind",
+            "type": "string"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "portfolioId": {
+            "title": "Portfolioid",
+            "type": "string"
+          },
+          "sourceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourceids",
+            "type": "array"
+          },
+          "status": {
+            "const": "derived",
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "window": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Window",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "metric",
+          "value",
+          "unit",
+          "districtId",
+          "category",
+          "text",
+          "window",
+          "aggregation",
+          "status",
+          "sourceIds",
+          "portfolioId",
+          "evidenceIds",
+          "kind"
+        ],
+        "title": "ClaimResponse",
+        "type": "object"
+      },
+      "Constraints": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedDistricts": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alloweddistricts"
+          },
+          "fixedSelections": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SelectionInput"
+            },
+            "maxItems": 5,
+            "title": "Fixedselections",
+            "type": "array"
+          },
+          "maxReplacements": {
+            "default": 1,
+            "maximum": 1.0,
+            "minimum": 1.0,
+            "title": "Maxreplacements",
+            "type": "integer"
+          },
+          "resultLimit": {
+            "default": 3,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Resultlimit",
+            "type": "integer"
+          }
+        },
+        "title": "Constraints",
+        "type": "object"
+      },
+      "DecompositionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "averageContribution": {
+            "$ref": "#/components/schemas/ValueChangeResponse"
+          },
+          "criticalPenalty": {
+            "$ref": "#/components/schemas/ValueChangeResponse"
+          },
+          "minimumContribution": {
+            "$ref": "#/components/schemas/ValueChangeResponse"
+          },
+          "total": {
+            "$ref": "#/components/schemas/ValueChangeResponse"
+          }
+        },
+        "required": [
+          "averageContribution",
+          "minimumContribution",
+          "criticalPenalty",
+          "total"
+        ],
+        "title": "DecompositionResponse",
+        "type": "object"
+      },
+      "EvaluationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "aqolScore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aqolscore"
+          },
+          "average": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average"
+          },
+          "cost": {
+            "title": "Cost",
+            "type": "number"
+          },
+          "criticalCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criticalcount"
+          },
+          "decomposition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecompositionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "districtScoreDeltas": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Districtscoredeltas",
+            "type": "object"
+          },
+          "districtScores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Districtscores",
+            "type": "object"
+          },
+          "indicatorDeltas": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            "title": "Indicatordeltas",
+            "type": "object"
+          },
+          "indicators": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            "title": "Indicators",
+            "type": "object"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueResponse"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "minimum": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minimum"
+          },
+          "remainingBudget": {
+            "title": "Remainingbudget",
+            "type": "number"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/Versions"
+          }
+        },
+        "required": [
+          "valid",
+          "issues",
+          "cost",
+          "remainingBudget",
+          "versions",
+          "score",
+          "aqolScore",
+          "districtScores",
+          "districtScoreDeltas",
+          "indicators",
+          "indicatorDeltas",
+          "average",
+          "minimum",
+          "criticalCount",
+          "decomposition"
+        ],
+        "title": "EvaluationResponse",
+        "type": "object"
+      },
+      "EvidenceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregation": {
+            "title": "Aggregation",
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "summary",
+              "strengths",
+              "risks",
+              "consequences",
+              "proposals"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "districtId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Districtid"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "portfolioId": {
+            "title": "Portfolioid",
+            "type": "string"
+          },
+          "sourceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourceids",
+            "type": "array"
+          },
+          "status": {
+            "const": "derived",
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "window": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Window",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "metric",
+          "value",
+          "unit",
+          "districtId",
+          "category",
+          "text",
+          "window",
+          "aggregation",
+          "status",
+          "sourceIds",
+          "portfolioId"
+        ],
+        "title": "EvidenceResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 1000000,
+            "title": "Content",
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "source-text-v1",
+              "city-json-v1",
+              "geojson-v1"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "passport": {
+            "$ref": "#/components/schemas/PassportRequest"
+          }
+        },
+        "required": [
+          "format",
+          "content",
+          "passport"
+        ],
+        "title": "ImportRequest",
+        "type": "object"
+      },
+      "IssueResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "field",
+          "message"
+        ],
+        "title": "IssueResponse",
+        "type": "object"
+      },
+      "PassportRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "datasetId": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+            "title": "Datasetid",
+            "type": "string"
+          },
+          "geographyVersion": {
+            "default": "unspecified",
+            "title": "Geographyversion",
+            "type": "string"
+          },
+          "licenseOrPermission": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Licenseorpermission",
+            "type": "string"
+          },
+          "missingnessPolicy": {
+            "default": "explicit-null",
+            "title": "Missingnesspolicy",
+            "type": "string"
+          },
+          "owner": {
+            "default": "unspecified",
+            "title": "Owner",
+            "type": "string"
+          },
+          "priceBasePeriod": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pricebaseperiod"
+          },
+          "retrievedAt": {
+            "title": "Retrievedat",
+            "type": "string"
+          },
+          "sourceType": {
+            "enum": [
+              "observed",
+              "estimated",
+              "synthetic"
+            ],
+            "title": "Sourcetype",
+            "type": "string"
+          },
+          "sourceUri": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Sourceuri",
+            "type": "string"
+          },
+          "units": {
+            "default": "unspecified",
+            "title": "Units",
+            "type": "string"
+          },
+          "usageRestrictions": {
+            "default": "none",
+            "title": "Usagerestrictions",
+            "type": "string"
+          },
+          "validFrom": {
+            "title": "Validfrom",
+            "type": "string"
+          },
+          "validTo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validto"
+          }
+        },
+        "required": [
+          "datasetId",
+          "sourceType",
+          "sourceUri",
+          "licenseOrPermission",
+          "retrievedAt",
+          "validFrom"
+        ],
+        "title": "PassportRequest",
+        "type": "object"
+      },
+      "PortfolioRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "selections": {
+            "items": {
+              "$ref": "#/components/schemas/SelectionInput"
+            },
+            "maxItems": 100,
+            "title": "Selections",
+            "type": "array"
+          },
+          "versions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Versions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "selections"
+        ],
+        "title": "PortfolioRequest",
+        "type": "object"
+      },
+      "ProposalResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "evaluation": {
+            "additionalProperties": true,
+            "title": "Evaluation",
+            "type": "object"
+          },
+          "evidenceId": {
+            "title": "Evidenceid",
+            "type": "string"
+          },
+          "portfolioId": {
+            "title": "Portfolioid",
+            "type": "string"
+          },
+          "selections": {
+            "items": {
+              "$ref": "#/components/schemas/SelectionInput"
+            },
+            "title": "Selections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "evidenceId",
+          "portfolioId",
+          "selections",
+          "evaluation"
+        ],
+        "title": "ProposalResponse",
+        "type": "object"
+      },
+      "PublishRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedWarnings": {
+            "default": [],
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Acceptedwarnings",
+            "type": "array"
+          }
+        },
+        "title": "PublishRequest",
+        "type": "object"
+      },
+      "SearchResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "evaluatedCandidates": {
+            "title": "Evaluatedcandidates",
+            "type": "integer"
+          },
+          "isGlobalOptimum": {
+            "const": false,
+            "title": "Isglobaloptimum",
+            "type": "boolean"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AlternativeResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "searchType": {
+            "const": "local-one-edit",
+            "title": "Searchtype",
+            "type": "string"
+          },
+          "validCandidates": {
+            "title": "Validcandidates",
+            "type": "integer"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/Versions"
+          }
+        },
+        "required": [
+          "versions",
+          "searchType",
+          "isGlobalOptimum",
+          "evaluatedCandidates",
+          "validCandidates",
+          "results"
+        ],
+        "title": "SearchResponse",
+        "type": "object"
+      },
+      "SelectionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "districtId": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Districtid"
+          },
+          "measureId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Measureid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "measureId",
+          "districtId"
+        ],
+        "title": "SelectionInput",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "ValidationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cost": {
+            "title": "Cost",
+            "type": "number"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueResponse"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "remainingBudget": {
+            "title": "Remainingbudget",
+            "type": "number"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/Versions"
+          }
+        },
+        "required": [
+          "valid",
+          "issues",
+          "cost",
+          "remainingBudget",
+          "versions"
+        ],
+        "title": "ValidationResponse",
+        "type": "object"
+      },
+      "ValueChangeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "title": "After",
+            "type": "number"
+          },
+          "before": {
+            "title": "Before",
+            "type": "number"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "number"
+          }
+        },
+        "required": [
+          "before",
+          "after",
+          "delta"
+        ],
+        "title": "ValueChangeResponse",
+        "type": "object"
+      },
+      "Versions": {
+        "additionalProperties": false,
+        "properties": {
+          "catalogVersion": {
+            "title": "Catalogversion",
+            "type": "string"
+          },
+          "dataSnapshotId": {
+            "title": "Datasnapshotid",
+            "type": "string"
+          },
+          "modelVersion": {
+            "title": "Modelversion",
+            "type": "string"
+          },
+          "rulesVersion": {
+            "title": "Rulesversion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogVersion",
+          "dataSnapshotId",
+          "modelVersion",
+          "rulesVersion"
+        ],
+        "title": "Versions",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Synthetic official V1. AQOL is computed by the deterministic engine, never LLM.",
+    "title": "AKIM V1 API",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/catalog": {
+      "get": {
+        "operationId": "catalog_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Catalog"
+      }
+    },
+    "/datasets": {
+      "get": {
+        "operationId": "datasets_datasets_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Datasets"
+      }
+    },
+    "/datasets/imports": {
+      "post": {
+        "operationId": "create_import_datasets_imports_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Import"
+      }
+    },
+    "/datasets/imports/{import_id}/publish": {
+      "post": {
+        "operationId": "publish_datasets_imports__import_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "import_id",
+            "required": true,
+            "schema": {
+              "title": "Import Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish"
+      }
+    },
+    "/datasets/imports/{import_id}/report": {
+      "get": {
+        "operationId": "report_datasets_imports__import_id__report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "import_id",
+            "required": true,
+            "schema": {
+              "title": "Import Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report"
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/v1/alternatives": {
+      "post": {
+        "operationId": "alternatives_v1_alternatives_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlternativesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Alternatives"
+      }
+    },
+    "/v1/analysis": {
+      "post": {
+        "operationId": "analysis_v1_analysis_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analysis"
+      }
+    },
+    "/v1/evaluate": {
+      "post": {
+        "operationId": "evaluate_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate"
+      }
+    },
+    "/v1/validate": {
+      "post": {
+        "operationId": "validate_v1_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate"
+      }
+    }
+  }
+}
