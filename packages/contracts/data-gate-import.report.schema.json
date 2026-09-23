@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "akim/data-gate-import.report.schema.json",
+  "title": "Data Gate import report",
+  "description": "Ответ POST /datasets/imports и GET /datasets/imports/{id}/report (docs/02 §5, docs/05).",
+  "type": "object",
+  "required": ["id", "status", "createdAt", "passport", "report", "mapping", "publishedSnapshotId"],
+  "properties": {
+    "id": {"type": "string"},
+    "status": {"enum": ["rejected", "ready", "published"]},
+    "createdAt": {"type": "string"},
+    "passport": {"$ref": "#/$defs/passport"},
+    "report": {
+      "type": "object",
+      "required": ["id", "counts", "blocksPublication", "issues"],
+      "properties": {
+        "id": {"type": "string"},
+        "counts": {
+          "type": "object",
+          "required": ["critical", "warning", "info"],
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        },
+        "blocksPublication": {"type": "boolean"},
+        "issues": {"type": "array", "items": {"$ref": "#/$defs/issue"}}
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": ["mapped", "unmapped"],
+      "properties": {
+        "mapped": {"type": "array", "items": {"type": "string"}},
+        "unmapped": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "publishedSnapshotId": {"type": ["string", "null"]},
+    "preview": {
+      "type": "object",
+      "required": ["baseSnapshotId", "changeCount", "truncated", "changes"],
+      "properties": {
+        "baseSnapshotId": {"type": ["string", "null"]},
+        "changeCount": {"type": "integer", "minimum": 0},
+        "truncated": {"type": "boolean"},
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "before", "after"],
+            "properties": {"path": {"type": "string"}, "before": {}, "after": {}}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "required": ["code", "severity", "field", "message"],
+      "properties": {
+        "code": {"type": "string"},
+        "severity": {"enum": ["critical", "warning", "info"]},
+        "field": {"type": "string"},
+        "message": {"type": "string"}
+      }
+    },
+    "passport": {
+      "type": "object",
+      "required": [
+        "datasetId", "schema", "schemaVersion", "sourceType", "sourceFormat", "sourceUri",
+        "licenseOrPermission", "retrievedAt", "validFrom", "validTo", "geographyVersion",
+        "units", "currency", "priceBasePeriod", "rawChecksum", "checksum",
+        "transformVersion", "missingnessPolicy", "qualityReportId", "owner", "usageRestrictions"
+      ],
+      "properties": {
+        "datasetId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+        "schema": {"enum": ["city-v1", "territory-geojson-v1"]},
+        "schemaVersion": {"type": "string"},
+        "sourceType": {"enum": ["observed", "estimated", "synthetic"]},
+        "sourceFormat": {"enum": ["source-text-v1", "city-json-v1", "geojson-v1"]},
+        "rawChecksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "checksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "validTo": {"type": ["string", "null"]},
+        "currency": {"type": ["string", "null"]},
+        "priceBasePeriod": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "akim/data-gate-snapshot.manifest.schema.json",
+  "title": "Data Gate snapshot manifest",
+  "description": "Ответ POST /datasets/imports/{id}/publish. Эксперименты ссылаются на снимок по id (Scenario.dataSnapshotId).",
+  "type": "object",
+  "required": ["id", "datasetId", "importId", "publishedAt", "passport", "acceptedWarnings"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*--[0-9a-f]{12}$"},
+    "datasetId": {"type": "string"},
+    "importId": {"type": "string"},
+    "publishedAt": {"type": "string"},
+    "passport": {"$ref": "data-gate-import.report.schema.json#/$defs/passport"},
+    "acceptedWarnings": {"type": "array", "items": {"type": "string"}}
+  }
+}
